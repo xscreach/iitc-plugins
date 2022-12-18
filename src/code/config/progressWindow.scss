@@ -1,0 +1,34 @@
+.wm-dialog-wm-config-progress {
+  .form {
+    div[data-value="false"]::before {
+      content: "🔴";
+    }
+
+    div[data-value="true"]::before {
+      content: "🟢";
+    }
+  }
+
+  .progress-bar {
+    width: 90%;
+    border: 1px solid #ffce00;
+
+    & > * {
+      display: inline-block;
+      text-align: center;
+      height: 1rem;
+    }
+
+    .ok, .detailsLoaded {
+      background: green;
+    }
+
+    .errors {
+      background: red;
+    }
+
+    .detailsCached {
+     background: yellow;
+    }
+  }
+}

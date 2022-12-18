@@ -1,0 +1,31 @@
+{
+  "headers": {
+    "common": {
+      "author": "screach",
+      "match": [
+        "https://intel.ingress.com/*",
+        "https://intel-x.ingress.com/*"
+      ],
+      "name": "IITC plugin: ${pluginName}",
+      "namespace": "https://github.com/IITC-CE/ingress-intel-total-conversion"
+    },
+    "local": {
+      "downloadURL": "http://localhost:8000/${pluginCode}.user.js",
+      "updateURL": "http://localhost:8000/${pluginCode}.meta.js"
+    }
+  },
+  "plugins": [
+    {
+      "headers": {
+        "id": "WasabeeMarkers@screach",
+        "description": "Marks specific portals with Wasabee markers",
+        "version": "0.0.1.BUILDDATE"
+      },
+      "pluginCode": "wasabeeMarkers",
+      "pluginName": "Wasabee Markers"
+    }
+  ],
+  "releaseFolder": {
+    "local": "./releases/local/"
+  }
+}

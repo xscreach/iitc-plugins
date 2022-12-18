@@ -1,0 +1,15 @@
+.wm-dialog {
+  .form {
+    .array-item {
+      cursor: pointer;
+      padding: 3px;
+      display: inline-block;
+      white-space: nowrap;
+
+      &.selected {
+        color: #ffce00;
+        box-shadow: inset 0 0 3px #ffce00;
+      }
+    }
+  }
+}

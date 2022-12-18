@@ -1,0 +1,37 @@
+.wm-dialog-wm-config {
+
+  .form {
+    display: unset;
+
+    & > * {
+      width: 100%
+    }
+  }
+
+  .wm-condition-row {
+    display: grid;
+    grid-template-columns: auto min-content;
+    grid-column-gap: 5px;
+
+
+    .wm-condition-condition {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    & > div {
+      padding: 2px 0;
+      display: inline;
+
+      &.wm-condition-index {
+        display: none;
+      }
+    }
+  }
+
+  .ui-dialog-buttonset > button:first-child {
+    float: left;
+  }
+}
+

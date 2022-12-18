@@ -1,34 +1,79 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": { "project": "./tsconfig.json" },
-  "env": { "es6": true },
-  "ignorePatterns": ["node_modules", "build", "coverage"],
-  "plugins": ["import", "eslint-comments", "functional"],
-  "extends": [
-    "eslint:recommended",
-    "plugin:eslint-comments/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:import/typescript",
-    "plugin:functional/lite",
-    "prettier",
-    "prettier/@typescript-eslint"
-  ],
-  "globals": { "BigInt": true, "console": true, "WebAssembly": true },
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "module"
+  },
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "plugins": [],
+  "env": {
+    "browser": true,
+    "jest": false,
+    "es6": true,
+    "node": true,
+    "jquery": true,
+    "greasemonkey": true,
+    "commonjs": true,
+    "es2020": true
+  },
+  "ignorePatterns": ["*.d.ts"],
   "rules": {
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "eslint-comments/disable-enable-pair": [
-      "error",
-      { "allowWholeFile": true }
-    ],
-    "eslint-comments/no-unused-disable": "error",
-    "import/order": [
-      "error",
-      { "newlines-between": "always", "alphabetize": { "order": "asc" } }
-    ],
-    "sort-imports": [
-      "error",
-      { "ignoreDeclarationSort": true, "ignoreCase": true }
-    ]
-  }
+    "prettier/prettier": ["error", { "endOfLine": "auto" }],
+    "no-console": "off",
+    "lines-between-class-members": ["error", "always"],
+    "no-template-curly-in-string": 1,
+    "block-scoped-var": 1,
+    "class-methods-use-this": "off",
+    "consistent-return": 1,
+    "default-case": 1,
+    "no-lone-blocks": 1,
+    "no-magic-numbers": "off",
+    "no-new": 1,
+    "no-implied-eval": 1,
+    "no-invalid-this": 1,
+    "no-return-assign": 1,
+    "no-return-await": 1,
+    "no-useless-concat": 1,
+    "require-await": 1,
+    "no-caller": 1,
+    "no-extend-native": 1,
+    "no-implicit-globals": 1,
+    "no-iterator": 1,
+    "no-labels": 1,
+    "no-new-func": 1,
+    "no-new-wrappers": 1,
+    "no-self-compare": 1,
+    "no-throw-literal": 1,
+    "no-unused-expressions": 1,
+    "no-void": 1,
+    "no-sequences": 1,
+    "radix": 1
+  },
+  "globals": {
+    "L": "readonly",
+    "PLAYER": "readonly",
+    "android": "readonly",
+    "plugin": "readonly"
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.ts"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
+      ],
+      "rules": {
+        "prettier/prettier": 0,
+        "lines-between-class-members": 0,
+        "@typescript-eslint/no-array-constructor": 1,
+        "@typescript-eslint/no-empty-function": 1,
+        "@typescript-eslint/no-inferrable-types": 1
+      }
+    }
+  ]
 }
