@@ -1,7 +1,6 @@
 .wm-dialog-wm-config-progress {
   .form {
-
-    grid-template-columns: auto max-content;
+    grid-template-columns: auto max-content !important;
 
     div[data-value="false"]::before {
       content: "🔴";

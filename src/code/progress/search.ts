@@ -45,7 +45,7 @@ export class WmSearch {
   public status: SearchStatus = new SearchStatus([]);
   private lastRequest = 0;
 
-  constructor(private readonly config: WmConfig) {
+  constructor(public config: WmConfig) {
   }
 
   private prepareQueue(): IITC.Portal[] {

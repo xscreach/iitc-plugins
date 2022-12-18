@@ -1,5 +1,5 @@
 import type {LeafletEvent} from "leaflet";
-import type {SearchStatus, WmSearch} from "../progress/search";
+import type {SearchStatus, WmSearch} from "./search";
 import {Dialog} from "../ui/dialog";
 import "./progressWindow.scss";
 
@@ -81,6 +81,7 @@ export class ProgressWindow extends Dialog {
 
     this.appendProgressBar(html, ProgressWindow.progressFields, 'Progress');
     this.appendProgressBar(html, ProgressWindow.progressFields2, 'Progress2');
+    this.updateFields({ status: this.search.status });
 
     this.lastStatus = this.search.status.running;
     this.createDialog({
@@ -105,6 +106,15 @@ export class ProgressWindow extends Dialog {
   }
 
   private updateStatus(ev: LeafletEvent | { status: SearchStatus }): void {
+    this.updateFields(ev);
+
+    if (this.initialized && ev.status.running != this.lastStatus) {
+      this.lastStatus = ev.status.running;
+      this.setButtons([ev.status.running ? this.stopButton : this.startButton, this.closeButton]);
+    }
+  }
+
+  private updateFields(ev: LeafletEvent | { status: SearchStatus }) {
     Object.keys(ProgressWindow.fields).forEach(field => {
       const element = this.fieldMap[field];
       const value = String(ev.status[field]);
@@ -114,11 +124,6 @@ export class ProgressWindow extends Dialog {
 
     this.updateProgressFields(ProgressWindow.progressFields, ev.status, 'Progress', ev.status.initialQueue);
     this.updateProgressFields(ProgressWindow.progressFields2, ev.status, 'Progress2', ev.status.detailsRequested);
-
-    if (this.initialized && ev.status.running != this.lastStatus) {
-      this.lastStatus = ev.status.running;
-      this.setButtons([ev.status.running ? this.stopButton : this.startButton, this.closeButton]);
-    }
   }
 
   private updateProgressFields(fields: (keyof SearchStatus)[], status: SearchStatus, mapSuffix: string, total: number) {

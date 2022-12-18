@@ -1,5 +1,6 @@
-import {WmCondition, WmConfig, WmConfigHolder, WmModRarityText} from "../config";
-import {WmSearch} from "../progress/search";
+import {WmCondition, WmConfigHolder, WmModRarityText} from "../config";
+import {ProgressWindow} from "../progress/progressWindow";
+import type {WmSearch} from "../progress/search";
 import {WasabeeMarker} from "../types/globals";
 import {Dialog} from "../ui/dialog";
 import {Form} from "../ui/forms/forms";
@@ -7,19 +8,14 @@ import {NumberInputField} from "../ui/forms/numberInputField";
 import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
 import {ConditionDialog} from "./conditionDialog";
 import "./configWindow.scss";
-import {ProgressWindow} from "./progressWindow";
 
 export class ConfigWindow extends Dialog {
 
-  private readonly config: WmConfig;
-  private readonly search: WmSearch
   private readonly table: HTMLDivElement;
   private form: Form;
 
-  constructor() {
+  constructor(private readonly search: WmSearch) {
     super();
-    this.config = WmConfigHolder.config.copy();
-    this.search = new WmSearch(this.config);
     this.form = this.createForm();
     this.table = L.DomUtil.create('div', 'wm-condition-table')
   }
@@ -27,7 +23,6 @@ export class ConfigWindow extends Dialog {
   addHooks() {
     this._displayDialog();
   }
-
 
   private _displayDialog() {
     const html = L.DomUtil.create("div", "container");
@@ -44,7 +39,7 @@ export class ConfigWindow extends Dialog {
         this.conditionDialog();
       },
       "Save": () => {
-        this.config.save();
+        this.search.config.save();
       },
       "Close": () => {
         this.closeDialog();
@@ -58,7 +53,7 @@ export class ConfigWindow extends Dialog {
       dialogClass: "wm-config",
       buttons: buttons,
       id: 'wm-config',
-      closeCallback: () => this.renderTable()
+      closeCallback: () => this.search.config = WmConfigHolder.config.copy()
     });
   }
 
@@ -70,7 +65,7 @@ export class ConfigWindow extends Dialog {
       new NumberInputField("portalDetailRequestDelay", "Delay between portal detail requests (ms)", 0),
       new SelectField("markerType", "Marker type", options),
     ];
-    return new Form(this.config, formConfig);
+    return new Form(this.search.config, formConfig);
   }
 
   private conditionLine(index: number, condition: WmCondition, html: HTMLDivElement) {
@@ -102,18 +97,18 @@ export class ConfigWindow extends Dialog {
     dlt.title = 'Delete';
     dlt.textContent = 'x';
     dlt.addEventListener('click', () => {
-      this.config.conditions.splice(index, 1);
+      this.search.config.conditions.splice(index, 1);
       this.renderTable();
     });
   }
 
   private renderTable() {
     L.DomUtil.empty(this.table);
-    this.config.conditions.forEach((condition, i) => this.conditionLine(i, condition, this.table))
+    this.search.config.conditions.forEach((condition, i) => this.conditionLine(i, condition, this.table))
   }
 
   private conditionDialog(condition?: WmCondition) {
-    new ConditionDialog(this.config, condition)
+    new ConditionDialog(this.search.config, condition)
       .onClose(() => this.renderTable())
       .enable();
   }
