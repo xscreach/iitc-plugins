@@ -53,6 +53,7 @@ export class WmConfig {
   public markerType: string = WasabeeMarker[WasabeeMarker.DestroyPortalAlert]
   public conditions: WmCondition[] = []
   public portalDetailRequestDelay = 250;
+  public portalDetailThreads = 5;
 
 
   public save(): void {

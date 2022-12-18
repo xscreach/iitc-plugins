@@ -62,6 +62,7 @@ export class ConfigWindow extends Dialog {
       .fill(0)
       .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], WasabeeMarker[index]));
     const formConfig = [
+      new NumberInputField("portalDetailThreads", "Max simultaneous portal detail requests", 1),
       new NumberInputField("portalDetailRequestDelay", "Delay between portal detail requests (ms)", 0),
       new SelectField("markerType", "Marker type", options),
     ];

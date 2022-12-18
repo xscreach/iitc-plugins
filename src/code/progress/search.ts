@@ -70,7 +70,11 @@ export class WmSearch {
         this.status = new SearchStatus(this.queue, true);
         this.lastRequest = 0;
         this.markProgress();
-        resolve(this.startCheckingLoop());
+        const promises: Promise<void>[] = [];
+        for (let i = 0; i < this.config.portalDetailThreads; i++) {
+          promises.push(this.startCheckingLoop());
+        }
+        Promise.all(promises).finally(() => resolve());
       }, 0);
     });
   }
