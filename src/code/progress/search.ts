@@ -40,7 +40,6 @@ export class SearchStatus {
 }
 
 export class WmSearch {
-  private progressCallback?: (status: SearchStatus) => void;
   private queue: IITC.Portal[] = [];
 
   public status: SearchStatus = new SearchStatus([]);
@@ -50,7 +49,7 @@ export class WmSearch {
   }
 
   private prepareQueue(): IITC.Portal[] {
-    return Object.values(portals).filter(this.locationCheck)
+    return Object.values(portals).filter((portal) => this.checkLocation(portal))
   }
 
   start() {
@@ -69,42 +68,63 @@ export class WmSearch {
       setTimeout(() => {
         this.queue = this.prepareQueue();
         this.status = new SearchStatus(this.queue, true);
+        this.lastRequest = 0;
         this.markProgress();
         resolve(this.startCheckingLoop());
       }, 0);
     });
   }
 
-  private locationCheck(portalNode: IITC.Portal) {
-    return (
-      window.map.getBounds().contains(portalNode.getLatLng()) &&
-      (!window.plugin.wasabee ||
-        !window.plugin.wasabee._selectedOp.zones ||
-        !window.plugin.wasabee._selectedOp.zones[0] ||
-        !window.plugin.wasabee._selectedOp.zones[0].points ||
-        !(window.plugin.wasabee._selectedOp.zones[0].points.length > 0) ||
-        window.plugin.wasabee._selectedOp.zones[0].contains(portalNode.getLatLng()))
-    )
+  private checkLocation(portalNode: IITC.Portal): boolean {
+    return this.isVisible(portalNode) && (!this.hasZonePoints() || this.isInZone(portalNode));
+  }
+
+  private isInZone(portalNode: IITC.Portal): boolean {
+    if (this.hasZonePoints()) {
+      return this.getZone().contains(portalNode.getLatLng());
+    }
+    return false;
+  }
+
+  private getZone() {
+    let zone;
+    if (
+      plugin.wasabee
+      && plugin.wasabee._selectedOp
+      && plugin.wasabee._selectedOp.zones
+      && plugin.wasabee._selectedOp.zones.length > 0
+    ) {
+      zone = plugin.wasabee._selectedOp.zones[0];
+    }
+    return zone;
+  }
+
+  private hasZonePoints() {
+    const zone = this.getZone();
+    if (zone && zone.points) {
+      return zone.points.length > 0
+    }
+    return false;
+  }
+
+  private isVisible(portalNode: IITC.Portal) {
+    return window.map.getBounds().contains(portalNode.getLatLng());
   }
 
   private async startCheckingLoop(): Promise<void> {
     while (this.status.running && this.queue && this.queue.length > 0) {
       try {
         this.markProgress();
-        await this.checkNext();
+        await this.checkNode(this.queue.shift());
       } finally {
         this.markProgress();
       }
     }
   }
 
-  private async checkNext() {
-    await this.checkNode(this.queue.shift());
-  }
-
   private async checkNode(portalNode?: IITC.Portal) {
     if (this.status.running && portalNode) {
-      if (!this.locationCheck(portalNode)) {
+      if (!this.checkLocation(portalNode)) {
         return
       }
 
@@ -173,17 +193,8 @@ export class WmSearch {
     return condition.factions.indexOf(portalOptions.team) >= 0;
   }
 
-  public progress(callback: (status: SearchStatus) => void): WmSearch {
-    this.progressCallback = callback;
-    return this;
-  }
-
   private markProgress() {
-    setTimeout(() => {
-      if (this.progressCallback) {
-        this.progressCallback(this.status)
-      }
-    }, 0);
+    map.fire('wasabee_markers:progress', { status: this.status });
   }
 
   private checkLevel(condition: WmCondition, portalOptions: IITC.PortalOptions): boolean {

@@ -1,5 +1,8 @@
 .wm-dialog-wm-config-progress {
   .form {
+
+    grid-template-columns: auto max-content;
+
     div[data-value="false"]::before {
       content: "🔴";
     }
@@ -10,7 +13,7 @@
   }
 
   .progress-bar {
-    width: 90%;
+    width: 100%;
     border: 1px solid #ffce00;
 
     & > * {

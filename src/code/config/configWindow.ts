@@ -16,7 +16,6 @@ export class ConfigWindow extends Dialog {
   private readonly table: HTMLDivElement;
   private form: Form;
 
-
   constructor() {
     super();
     this.config = WmConfigHolder.config.copy();
@@ -38,6 +37,7 @@ export class ConfigWindow extends Dialog {
 
     const buttons = {
       "Search": () => {
+        this.search.start();
         new ProgressWindow(this.search).enable();
       },
       "Add Condition": () => {
