@@ -76,6 +76,7 @@ export class ConfigWindow extends Dialog {
       .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], WasabeeMarker[index]));
     const formConfig = [
       new BooleanCheckBoxField("keepScanning", "Scan when map with portals loaded"),
+      new BooleanCheckBoxField("autoUpload", "Upload operation when done"),
       new BooleanCheckBoxField("showProgress", "Show progress"),
       new BooleanCheckBoxField("showResults", "Show results"),
       new NumberInputField("portalDetailThreads", "Max simultaneous portal detail requests", 1),

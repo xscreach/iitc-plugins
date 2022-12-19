@@ -1,10 +1,10 @@
 import {WmConfigHolder} from "./config/config";
 import {ConfigWindow} from "./config/configWindow";
+import * as WM from "./globals";
 import {ProgressWindow} from "./progress/progressWindow";
 import {WmSearch} from "./progress/search";
-import * as WM from "./globals";
-import {ActionButton} from "./wmActionButton";
 import "./wasabeeMarkers-mobile.scss"
+import {ActionButton} from "./wmActionButton";
 
 window.plugin.wasabeeMarkers.init = function () {
 
@@ -17,11 +17,16 @@ window.plugin.wasabeeMarkers.init = function () {
   const progress = new ProgressWindow(search);
   const actionButton = new ActionButton(search, progress);
 
-  const statusListener = () => {
+  search.addEventListener('wasabee_markers:progress', () => {
     progress.updateStatus(search.status);
     actionButton.updateStatus(search.status);
-  }
-  search.addEventListener('wasabee_markers:progress', statusListener);
+  });
+
+  search.addEventListener('wasabee_markers:done', () => {
+    if (search.config.autoUpload && search.status.added > 0 || search.status.removed > 0) {
+      $('.wasabee-toolbar-upload')[0].click();
+    }
+  });
 
   $('<a>')
     .html(WM.PLUGIN_NAME)

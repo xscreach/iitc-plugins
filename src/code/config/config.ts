@@ -57,6 +57,7 @@ export class WmConfig {
   public showProgress = false;
   public showResults = true;
   public keepScanning = false;
+  public autoUpload = true;
 
 
   public save(): void {

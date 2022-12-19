@@ -30,7 +30,7 @@ export class ConditionDialog extends Dialog {
   }
 
   private createForm() {
-    const levelComparatorOptions = Object.keys(WmComparatorTypes).map((value) => new SelectFieldOptions(value, WmComparatorTypes[value]));
+    const levelComparatorOptions = Object.keys(WmComparatorTypes).map((value) => new SelectFieldOptions(value, `${value} (${WmComparatorTypes[value]})`));
     const fields = [
       this.createFactionField(),
       new NumberInputField('level', "Level", 1, 8),

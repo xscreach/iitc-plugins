@@ -85,6 +85,7 @@ export class WmSearch extends EventTarget {
   stop() {
     this.status.running = false;
     this.markProgress();
+    this.markProgress('done');
   }
 
   private search(): Promise<void> {
@@ -224,8 +225,8 @@ export class WmSearch extends EventTarget {
     return condition.factions.indexOf(portalOptions.team) >= 0;
   }
 
-  private markProgress() {
-    this.dispatchEvent(new CustomEvent('wasabee_markers:progress', {detail: this.status}));
+  private markProgress(type: string = 'progress') {
+    this.dispatchEvent(new CustomEvent('wasabee_markers:' + type, {detail: this.status}));
   }
 
   private checkLevel(condition: WmCondition, portalOptions: IITC.PortalOptions): boolean {
