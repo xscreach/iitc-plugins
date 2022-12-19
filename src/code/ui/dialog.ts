@@ -1,3 +1,5 @@
+import "./dialog.scss"
+
 export class Dialog extends L.Handler {
   options: DialogOptions = {};
 
