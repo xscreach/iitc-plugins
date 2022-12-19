@@ -12,6 +12,10 @@
     "local": {
       "downloadURL": "http://localhost:8000/${pluginCode}.user.js",
       "updateURL": "http://localhost:8000/${pluginCode}.meta.js"
+    },
+    "prod": {
+      "updateURL": "https://raw.githubusercontent.com/xscreach/iitc-plugins/master/dist/releases/prod/${pluginCode}.meta.js",
+      "downloadURL": "https://raw.githubusercontent.com/xscreach/iitc-plugins/master/dist/releases/prod/${pluginCode}.user.js"
     }
   },
   "plugins": [
