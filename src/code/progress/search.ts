@@ -54,9 +54,13 @@ export class WmSearch extends EventTarget {
   }
 
   start() {
-    if (!this.status.running) {
+    if (!this.status.running && this.hasConditions()) {
       this.search().finally(() => this.stop());
     }
+  }
+
+  public hasConditions(): boolean {
+    return this.config.conditions && this.config.conditions.length > 0;
   }
 
   stop() {

@@ -31,4 +31,10 @@ window.plugin.wasabeeMarkers.init = function () {
     .appendTo('#toolbox');
 
   window.map.addControl(actionButton);
+
+  addHook("mapDataRefreshEnd", () => {
+    if (getDataZoomForMapZoom(map.getZoom()) >= 15 && search.config.keepScanning) {
+      search.start();
+    }
+  });
 }

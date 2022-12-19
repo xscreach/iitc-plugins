@@ -75,6 +75,7 @@ export class ConfigWindow extends Dialog {
       .fill(0)
       .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], WasabeeMarker[index]));
     const formConfig = [
+      new BooleanCheckBoxField("keepScanning", "Scan when map with portals loaded"),
       new BooleanCheckBoxField("showProgress", "Show progress"),
       new BooleanCheckBoxField("showResults", "Show results"),
       new NumberInputField("portalDetailThreads", "Max simultaneous portal detail requests", 1),
@@ -135,7 +136,7 @@ export class ConfigWindow extends Dialog {
   }
 
   private updateButtons() {
-    this.searchButton.disabled = !this.search.config.conditions || this.search.config.conditions.length == 0;
+    this.searchButton.disabled = !this.search.hasConditions();
     if (this.enabled()) {
       this.setButtons(this.buttons);
     }

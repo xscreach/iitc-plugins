@@ -56,6 +56,7 @@ export class WmConfig {
   public portalDetailThreads = 5;
   public showProgress = false;
   public showResults = true;
+  public keepScanning = false;
 
 
   public save(): void {
