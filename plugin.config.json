@@ -14,8 +14,8 @@
       "updateURL": "http://localhost:8000/${pluginCode}.meta.js"
     },
     "prod": {
-      "updateURL": "https://github.com/xscreach/iitc-plugins/raw/master/releases/prod/${pluginCode}.meta.js",
-      "downloadURL": "https://github.com/xscreach/iitc-plugins/raw/master/releases/prod/${pluginCode}.user.js"
+      "updateURL": "https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/releases/prod/${pluginCode}.meta.js",
+      "downloadURL": "https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/releases/prod/${pluginCode}.user.js"
     }
   },
   "plugins": [
