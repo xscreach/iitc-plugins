@@ -2,12 +2,16 @@
   .form {
     grid-template-columns: auto max-content !important;
 
-    div[data-value="false"]::before {
-      content: "🔴";
+    div[data-value="preparing"]::before {
+      content: "🟠";
     }
 
-    div[data-value="true"]::before {
+    div[data-value="running"]::before {
       content: "🟢";
+    }
+
+    div[data-value="done"]::before {
+      content: "🔴";
     }
   }
 

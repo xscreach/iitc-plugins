@@ -4,7 +4,7 @@ import type {SearchStatus, WmSearch} from "./search";
 
 export class ProgressWindow extends Dialog {
   private static fields: { [key: string]: string} = {
-    'running': 'Running',
+    'status': 'Status',
     'initialQueue': 'Initial Queue Size',
     'remaining': 'Remaining',
     'done': 'Done',

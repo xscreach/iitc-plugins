@@ -37,11 +37,30 @@ export class SearchStatus {
     }
     return 0;
   }
+
+  get status(): string {
+    if (this.running) {
+      if (this.initialQueue == 0) {
+        return 'preparing';
+      }
+      return 'running';
+    }
+    return 'done';
+  }
+
+  hasNext(): boolean {
+    return this.queue && this.queue.length > 0;
+  }
+
+  next(): IITC.Portal | undefined {
+    if (this.hasNext()) {
+      return this.queue.shift();
+    }
+    return undefined;
+  }
 }
 
 export class WmSearch extends EventTarget {
-  private queue: IITC.Portal[] = [];
-
   public status: SearchStatus = new SearchStatus([]);
   private lastRequest = 0;
 
@@ -74,10 +93,10 @@ export class WmSearch extends EventTarget {
 
     return new Promise<void>(resolve => {
       setTimeout(() => {
-        this.queue = this.prepareQueue();
-        this.status = new SearchStatus(this.queue, true);
-        this.lastRequest = 0;
+        this.status = new SearchStatus(this.prepareQueue(), true);
         this.markProgress();
+
+        this.lastRequest = 0;
         const promises: Promise<void>[] = [];
         for (let i = 0; i < this.config.portalDetailThreads; i++) {
           promises.push(this.startCheckingLoop());
@@ -124,10 +143,10 @@ export class WmSearch extends EventTarget {
   }
 
   private async startCheckingLoop(): Promise<void> {
-    while (this.status.running && this.queue && this.queue.length > 0) {
+    while (this.status.running && this.status.hasNext()) {
       try {
         this.markProgress();
-        await this.checkNode(this.queue.shift());
+        await this.checkNode(this.status.next());
       } finally {
         this.markProgress();
       }
