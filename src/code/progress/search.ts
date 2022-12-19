@@ -39,13 +39,14 @@ export class SearchStatus {
   }
 }
 
-export class WmSearch {
+export class WmSearch extends EventTarget {
   private queue: IITC.Portal[] = [];
 
   public status: SearchStatus = new SearchStatus([]);
   private lastRequest = 0;
 
   constructor(public config: WmConfig) {
+    super();
   }
 
   private prepareQueue(): IITC.Portal[] {
@@ -198,7 +199,7 @@ export class WmSearch {
   }
 
   private markProgress() {
-    map.fire('wasabee_markers:progress', { status: this.status });
+    this.dispatchEvent(new CustomEvent('wasabee_markers:progress', {detail: this.status}));
   }
 
   private checkLevel(condition: WmCondition, portalOptions: IITC.PortalOptions): boolean {

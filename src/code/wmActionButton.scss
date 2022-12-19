@@ -21,6 +21,7 @@
 
     &.working {
       cursor: auto;
+      box-shadow: inset 1px 1px 2px 0 #000, 1px 1px 4px 0 #0f0;
       animation: wasabeeMarkersSearching 0.9s infinite linear;
     }
 

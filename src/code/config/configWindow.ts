@@ -1,5 +1,5 @@
 import {WmCondition, WmConfigHolder, WmModRarityText} from "../config";
-import {ProgressWindow} from "../progress/progressWindow";
+import type {ProgressWindow} from "../progress/progressWindow";
 import type {WmSearch} from "../progress/search";
 import {WasabeeMarker} from "../types/globals";
 import {Dialog} from "../ui/dialog";
@@ -14,7 +14,7 @@ export class ConfigWindow extends Dialog {
   private readonly table: HTMLDivElement;
   private form: Form;
 
-  constructor(private readonly search: WmSearch) {
+  constructor(private readonly search: WmSearch, private readonly progress: ProgressWindow) {
     super();
     this.form = this.createForm();
     this.table = L.DomUtil.create('div', 'wm-condition-table')
@@ -33,7 +33,7 @@ export class ConfigWindow extends Dialog {
     const buttons = {
       "Search": () => {
         this.search.start();
-        new ProgressWindow(this.search).enable();
+        this.progress.enable();
       },
       "Add Condition": () => {
         this.conditionDialog();
