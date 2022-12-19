@@ -1,0 +1,20 @@
+.mobile {
+  .leaflet-control-container {
+
+    .leaflet-bottom {
+      bottom: 25px;
+    }
+
+    .leaflet-bottom.leaflet-left {
+      left: -5px;
+    }
+
+    .leaflet-bottom.leaflet-left > div:last-child {
+      bottom: -10px !important;
+    }
+  }
+
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+}

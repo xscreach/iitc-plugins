@@ -4,8 +4,13 @@ import {ProgressWindow} from "./progress/progressWindow";
 import {WmSearch} from "./progress/search";
 import * as WM from "./globals";
 import {ActionButton} from "./wmActionButton";
+import "./wasabeeMarkers-mobile.scss"
 
 window.plugin.wasabeeMarkers.init = function () {
+
+  if (isSmartphone()) {
+    $('body').addClass("mobile");
+  }
 
   const config = WmConfigHolder.config.copy();
   const search = new WmSearch(config);

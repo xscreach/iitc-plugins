@@ -1,11 +1,8 @@
 .wm-dialog-wm-config {
   .form {
-    display: unset;
-
-    & > * {
-      width: 100%;
-      display: block;
-    }
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
   }
 
   .wm-condition-row {
