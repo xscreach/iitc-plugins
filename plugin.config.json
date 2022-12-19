@@ -17,9 +17,10 @@
   "plugins": [
     {
       "headers": {
-        "id": "WasabeeAutoMarkers@screach",
+        "id": "WasabeeAutoMarkers",
         "description": "Marks specific portals with Wasabee markers based on configuration",
-        "version": "0.0.1.BUILDDATE"
+        "version": "0.0.1.BUILDDATE",
+        "category": "Wasabee"
       },
       "pluginCode": "wasabeeMarkers",
       "pluginName": "Wasabee Auto Markers"

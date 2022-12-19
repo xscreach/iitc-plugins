@@ -21,7 +21,6 @@ export class ProgressWindow extends Dialog {
   private static progressFields2: (keyof SearchStatus)[] = ['detailsCached', 'detailsLoaded', 'errors'];
 
   private fieldMap: { [key: string]: HTMLDivElement } = {};
-  private initialized = false;
   private lastStatus = false;
 
   private startButton = {
@@ -91,7 +90,6 @@ export class ProgressWindow extends Dialog {
       ],
       id: 'wm-config-progress'
     });
-    this.initialized = true;
   }
 
   private createDivs(fields: string[], suffix = '') {
@@ -118,7 +116,7 @@ export class ProgressWindow extends Dialog {
       this.lastStatus = status.running;
     }
 
-    if (this.initialized) {
+    if (this.enabled()) {
       this.setButtons([status.running ? this.stopButton : this.startButton, this.closeButton]);
     }
   }

@@ -1,13 +1,13 @@
-import {BooleanCheckBoxField} from "../ui/forms/booleanCheckBoxField";
-import {WmCondition, WmConfigHolder, WmModRarityText} from "./config";
+import {WasabeeMarker} from "../globals";
 import type {ProgressWindow} from "../progress/progressWindow";
 import type {WmSearch} from "../progress/search";
-import {WasabeeMarker} from "../globals";
 import {Dialog} from "../ui/dialog";
+import {BooleanCheckBoxField} from "../ui/forms/booleanCheckBoxField";
 import {Form} from "../ui/forms/forms";
 import {NumberInputField} from "../ui/forms/numberInputField";
 import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
 import {ConditionDialog} from "./conditionDialog";
+import {WmCondition, WmConfigHolder, WmModRarityText} from "./config";
 import "./configWindow.scss";
 
 export class ConfigWindow extends Dialog {
@@ -15,10 +15,38 @@ export class ConfigWindow extends Dialog {
   private readonly table: HTMLDivElement;
   private form: Form;
 
+  private readonly searchButton: JQueryUI.ButtonOptions = {
+    text: 'Search',
+    click: () => {
+      this.search.start();
+      this.progress.enable();
+    }
+  }
+
+  private readonly buttons: JQueryUI.ButtonOptions[] = [
+    this.searchButton,
+    {
+      text: "Add Condition",
+      click: () => {
+        this.conditionDialog();
+      }
+    },
+    {
+      text: "Save", click: () => {
+        this.search.config.save();
+      }
+    }, {
+      text:
+        "Close", click: () => {
+        this.closeDialog();
+      }
+    }];
+
   constructor(private readonly search: WmSearch, private readonly progress: ProgressWindow) {
     super();
     this.form = this.createForm();
     this.table = L.DomUtil.create('div', 'wm-condition-table')
+    this.updateButtons();
   }
 
   addHooks() {
@@ -31,28 +59,12 @@ export class ConfigWindow extends Dialog {
     this.renderTable();
     html.append(this.table);
 
-    const buttons = {
-      "Search": () => {
-        this.search.start();
-        this.progress.enable();
-      },
-      "Add Condition": () => {
-        this.conditionDialog();
-      },
-      "Save": () => {
-        this.search.config.save();
-      },
-      "Close": () => {
-        this.closeDialog();
-      }
-    };
-
     this.createDialog({
       title: "Wasabee Marker Config",
       html: html,
       width: "350",
       dialogClass: "wm-config",
-      buttons: buttons,
+      buttons: this.buttons,
       id: 'wm-config',
       closeCallback: () => this.search.config = WmConfigHolder.config.copy()
     });
@@ -102,8 +114,13 @@ export class ConfigWindow extends Dialog {
     dlt.textContent = 'x';
     dlt.addEventListener('click', () => {
       this.search.config.conditions.splice(index, 1);
-      this.renderTable();
+      this.updateWindow();
     });
+  }
+
+  private updateWindow() {
+    this.updateButtons();
+    this.renderTable();
   }
 
   private renderTable() {
@@ -111,9 +128,16 @@ export class ConfigWindow extends Dialog {
     this.search.config.conditions.forEach((condition, i) => this.conditionLine(i, condition, this.table))
   }
 
-  private conditionDialog(condition?: WmCondition) {
+  private conditionDialog(condition ?: WmCondition) {
     new ConditionDialog(this.search.config, condition)
-      .onClose(() => this.renderTable())
+      .onClose(() => this.updateWindow())
       .enable();
+  }
+
+  private updateButtons() {
+    this.searchButton.disabled = !this.search.config.conditions || this.search.config.conditions.length == 0;
+    if (this.enabled()) {
+      this.setButtons(this.buttons);
+    }
   }
 }
