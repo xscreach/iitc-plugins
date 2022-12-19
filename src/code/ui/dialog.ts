@@ -8,20 +8,21 @@ export class Dialog extends L.Handler {
     super(window.map);
   }
 
-  enable(): this {
-    super.enable();
-    if (!this._dialog) {
-      this.createDialog(this.options)
-    }
-    return this;
+  addHooks() {
+  }
+
+  removeHooks() {
   }
 
   createDialog(options: DialogOptions): void {
     if (!this._dialog) {
       options.dialogClass = `wm-dialog wm-dialog-${options.dialogClass}`;
 
-      if (this.onCloseCallback && !options.closeCallback) {
-        options.closeCallback = this.onCloseCallback;
+      options.closeCallback = () => {
+        if (this.onCloseCallback) {
+          this.onCloseCallback();
+        }
+        this.closeDialog();
       }
 
       L.setOptions(this, options);
@@ -56,6 +57,7 @@ export class Dialog extends L.Handler {
     if (this._dialog) {
       this._dialog.dialog("close");
       delete this._dialog;
+      this.disable();
     }
   }
 

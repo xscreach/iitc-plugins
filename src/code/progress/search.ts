@@ -1,5 +1,5 @@
 import type {IITC} from "../../types/iitc";
-import type {WmCondition, WmConfig} from "../config";
+import type {WmCondition, WmConfig} from "../config/config";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
 import {getMarker} from "../utils/wasabeeUtils";
@@ -65,6 +65,9 @@ export class WmSearch extends EventTarget {
   }
 
   private search(): Promise<void> {
+    this.status = new SearchStatus([], true);
+    this.markProgress();
+
     return new Promise<void>(resolve => {
       setTimeout(() => {
         this.queue = this.prepareQueue();

@@ -1,0 +1,11 @@
+.wm-dialog .form {
+  input[type="checkbox"] {
+    width: auto !important;
+    float: left;
+  }
+
+  label[for^="checkbox-"] {
+    margin-left: 20px;
+    width: calc(100% - 20px);
+  }
+}

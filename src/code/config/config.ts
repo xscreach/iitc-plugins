@@ -1,4 +1,4 @@
-import {WasabeeMarker} from "./types/globals";
+import {WasabeeMarker} from "../globals";
 
 export const WmComparatorTypes: { [key: string]: string } = {
   '>': 'Greater than',
@@ -54,6 +54,8 @@ export class WmConfig {
   public conditions: WmCondition[] = []
   public portalDetailRequestDelay = 250;
   public portalDetailThreads = 5;
+  public showProgress = false;
+  public showResults = true;
 
 
   public save(): void {

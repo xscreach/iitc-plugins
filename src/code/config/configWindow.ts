@@ -1,7 +1,8 @@
-import {WmCondition, WmConfigHolder, WmModRarityText} from "../config";
+import {BooleanCheckBoxField} from "../ui/forms/booleanCheckBoxField";
+import {WmCondition, WmConfigHolder, WmModRarityText} from "./config";
 import type {ProgressWindow} from "../progress/progressWindow";
 import type {WmSearch} from "../progress/search";
-import {WasabeeMarker} from "../types/globals";
+import {WasabeeMarker} from "../globals";
 import {Dialog} from "../ui/dialog";
 import {Form} from "../ui/forms/forms";
 import {NumberInputField} from "../ui/forms/numberInputField";
@@ -62,6 +63,8 @@ export class ConfigWindow extends Dialog {
       .fill(0)
       .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], WasabeeMarker[index]));
     const formConfig = [
+      new BooleanCheckBoxField("showProgress", "Show progress"),
+      new BooleanCheckBoxField("showResults", "Show results"),
       new NumberInputField("portalDetailThreads", "Max simultaneous portal detail requests", 1),
       new NumberInputField("portalDetailRequestDelay", "Delay between portal detail requests (ms)", 0),
       new SelectField("markerType", "Marker type", options),

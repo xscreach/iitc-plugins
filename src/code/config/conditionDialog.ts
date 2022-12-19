@@ -1,4 +1,4 @@
-import {WmComparatorTypes, WmCondition, WmConfig, WmModRarityText, WmModTypes} from "../config";
+import {WmComparatorTypes, WmCondition, WmConfig, WmModRarityText, WmModTypes} from "./config";
 import {Dialog} from "../ui/dialog";
 import type {Field} from "../ui/forms/field";
 import {Form} from "../ui/forms/forms";

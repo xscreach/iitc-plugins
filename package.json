@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "iitc plugins",
   "repository": "https://github.com/xscreach/plugins",
-  "main": "src/code/types/globals.ts",
+  "main": "src/code/globals.ts",
   "keywords": [],
   "private": true,
   "devDependencies": {
@@ -47,6 +47,7 @@
   "scripts": {
     "build": "webpack --progress --env build=local",
     "watch": "webpack --progress --env build=local --watch",
+    "prod": "webpack --progress --env build=prod",
     "format:check": "prettier --check src/code",
     "format:run": "prettier --write src/code",
     "lint:check": "eslint src",

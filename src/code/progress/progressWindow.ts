@@ -44,7 +44,6 @@ export class ProgressWindow extends Dialog {
       this.closeDialog();
     }
   };
-  private statusListener = () => this.updateStatus(this.search.status);
 
   constructor(private search: WmSearch) {
     super();
@@ -53,23 +52,21 @@ export class ProgressWindow extends Dialog {
     this.createDivs(ProgressWindow.progressFields2, 'Progress2');
   }
 
-  private createDivs(fields: string[], suffix = '') {
-    fields.forEach(field => {
-      this.fieldMap[field + suffix] = L.DomUtil.create('div', field);
-    })
+  enable(): this {
+    if (
+      this.search.config.showProgress && this.search.status.running
+      || this.search.config.showResults && !this.search.status.running
+    ) {
+      super.enable();
+    }
+    return this;
   }
 
   addHooks() {
     this.displayDialog();
-    this.search.addEventListener('wasabee_markers:progress', this.statusListener);
-    this.initialized = true;
   }
 
-  removeHooks() {
-    this.search.removeEventListener('wasabee_markers:progress', this.statusListener);
-  }
-
-  private displayDialog() {
+  displayDialog() {
     const html = L.DomUtil.create("div", "container");
     const form = L.DomUtil.create("div", "form", html);
 
@@ -92,11 +89,15 @@ export class ProgressWindow extends Dialog {
         this.lastStatus ? this.stopButton : this.startButton,
         this.closeButton
       ],
-      closeCallback: () => {
-        this.closeDialog();
-      },
       id: 'wm-config-progress'
     });
+    this.initialized = true;
+  }
+
+  private createDivs(fields: string[], suffix = '') {
+    fields.forEach(field => {
+      this.fieldMap[field + suffix] = L.DomUtil.create('div', field);
+    })
   }
 
   private appendProgressBar(html: HTMLDivElement, fields: (keyof SearchStatus)[], suffix: string) {
@@ -106,11 +107,18 @@ export class ProgressWindow extends Dialog {
     });
   }
 
-  private updateStatus(status: SearchStatus): void {
+  public updateStatus(status: SearchStatus): void {
     this.updateFields(status);
 
-    if (this.initialized && status.running != this.lastStatus) {
+    if (!this.enabled()) {
+      this.enable();
+    }
+
+    if (status.running != this.lastStatus) {
       this.lastStatus = status.running;
+    }
+
+    if (this.initialized) {
       this.setButtons([status.running ? this.stopButton : this.startButton, this.closeButton]);
     }
   }

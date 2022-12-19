@@ -157,7 +157,7 @@ module.exports = (env, argv) => {
           test: /\.scss$/,
           use: [
             // "to-string-loader",
-            dev ? "style-loader" : MiniCssExtractPlugin.loader,
+            "style-loader",
             {
               loader: "css-loader",
               options: { esModule: false, url: false },
