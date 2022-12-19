@@ -114,10 +114,9 @@ export class ProgressWindow extends Dialog {
 
     if (status.running != this.lastStatus) {
       this.lastStatus = status.running;
-    }
-
-    if (this.enabled()) {
-      this.setButtons([status.running ? this.stopButton : this.startButton, this.closeButton]);
+      if (this.enabled()) {
+        this.setButtons([status.running ? this.stopButton : this.startButton, this.closeButton]);
+      }
     }
   }
 
