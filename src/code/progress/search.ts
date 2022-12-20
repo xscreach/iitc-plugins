@@ -204,10 +204,9 @@ export class WmSearch extends EventTarget {
         const timeDiff = new Date().getTime() - this.lastRequest;
         if (timeDiff < this.config.portalDetailRequestDelay) {
           timeout = this.config.portalDetailRequestDelay - timeDiff;
-          this.lastRequest = new Date().getTime() + timeout;
         }
+        this.lastRequest = new Date().getTime() + timeout;
         setTimeout(() => {
-          this.lastRequest = new Date().getTime();
           portalDetail.request(portalGuid)
             .then(portalDetailData => {
               this.status.detailsLoaded++;

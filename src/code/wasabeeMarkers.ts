@@ -24,7 +24,10 @@ window.plugin.wasabeeMarkers.init = function () {
 
   search.addEventListener('wasabee_markers:done', () => {
     if (search.config.autoUpload && search.status.added > 0 || search.status.removed > 0) {
-      $('.wasabee-toolbar-upload')[0].click();
+      const uploadButtons = $('.wasabee-toolbar-upload');
+      if (uploadButtons && uploadButtons.length > 0) {
+        uploadButtons[0].click();
+      }
     }
   });
 
