@@ -242,11 +242,6 @@ export class WmSearch extends EventTarget {
   }
 
   private removeMarker(portalNode: IITC.Portal) {
-    if (portalNode.options.level == 0) {
-      //skip portal marker placeholders
-      return;
-    }
-
     const marker = getMarker(this.config.markerType, portalNode.options.guid)
     if (marker) {
       WU.removeMarker(marker);
