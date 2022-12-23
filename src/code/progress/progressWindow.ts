@@ -1,24 +1,28 @@
 import {Dialog} from "../ui/dialog";
+import {ProgressBar} from "../ui/progressBar";
 import "./progressWindow.scss";
 import type {SearchStatus, WmSearch} from "./search";
 
 export class ProgressWindow extends Dialog {
   private static fields: { [key: string]: string} = {
-    'status': 'Status',
-    'initialQueue': 'Initial Queue Size',
-    'remaining': 'Remaining',
-    'done': 'Done',
-    'ok': 'OK',
-    'detailsRequested': 'Portal Details Requested',
-    'detailsCached': 'Portal Details from cache',
-    'detailsLoaded': 'Loaded Portal Details',
-    'errors': 'Portal Detail Errors',
-    'added': 'Markers Added',
-    'removed': 'Markers Removed',
-    'totalMarkers': 'Total Markers'
+    'status': 'Status:',
+    'initialQueue': 'Initial Queue Size:',
+    'remaining': 'Remaining:',
+    'done': 'Done:',
+    'ok': 'OK:',
+    'detailsRequested': 'Portal Details Requested:',
+    'runningRequests': 'Requests running:',
+    'detailsCached': 'Portal Details from cache:',
+    'detailsLoaded': 'Loaded Portal Details:',
+    'errors': 'Portal Detail Errors:',
+    'added': 'Markers Added:',
+    'removed': 'Markers Removed:',
+    'totalMarkers': 'Total Markers:',
+    'durationText': 'Duration:'
   };
-  private static progressFields: (keyof SearchStatus)[] = ['ok', 'errors'];
-  private static progressFields2: (keyof SearchStatus)[] = ['detailsCached', 'detailsLoaded', 'errors'];
+
+  private progressBarTotal: ProgressBar;
+  private progressBarDetails: ProgressBar;
 
   private fieldMap: { [key: string]: HTMLDivElement } = {};
   private lastStatus = false;
@@ -47,8 +51,8 @@ export class ProgressWindow extends Dialog {
   constructor(private search: WmSearch) {
     super();
     this.createDivs(Object.keys(ProgressWindow.fields));
-    this.createDivs(ProgressWindow.progressFields, 'Progress');
-    this.createDivs(ProgressWindow.progressFields2, 'Progress2');
+    this.progressBarTotal = new ProgressBar(['ok', 'errors'])
+    this.progressBarDetails = new ProgressBar(['detailsCached', 'detailsLoaded', 'errors'])
   }
 
   enable(): this {
@@ -74,8 +78,9 @@ export class ProgressWindow extends Dialog {
       form.append(this.fieldMap[field]);
     });
 
-    this.appendProgressBar(html, ProgressWindow.progressFields, 'Progress');
-    this.appendProgressBar(html, ProgressWindow.progressFields2, 'Progress2');
+    this.progressBarTotal.appendTo(html);
+    this.progressBarDetails.appendTo(html);
+
     this.updateFields(this.search.status);
 
     this.lastStatus = this.search.status.running;
@@ -96,13 +101,6 @@ export class ProgressWindow extends Dialog {
     fields.forEach(field => {
       this.fieldMap[field + suffix] = L.DomUtil.create('div', field);
     })
-  }
-
-  private appendProgressBar(html: HTMLDivElement, fields: (keyof SearchStatus)[], suffix: string) {
-    const progressBar = L.DomUtil.create('div', 'progress-bar', html);
-    fields.forEach(field => {
-      progressBar.append(this.fieldMap[field + suffix])
-    });
   }
 
   public updateStatus(status: SearchStatus): void {
@@ -128,21 +126,7 @@ export class ProgressWindow extends Dialog {
       element.setAttribute('data-value', value);
     });
 
-    this.updateProgressFields(ProgressWindow.progressFields, status, 'Progress', status.initialQueue);
-    this.updateProgressFields(ProgressWindow.progressFields2, status, 'Progress2', status.detailsRequested);
-  }
-
-  private updateProgressFields(fields: (keyof SearchStatus)[], status: SearchStatus, mapSuffix: string, total: number) {
-    fields.forEach(field => {
-      this.updateProgressField(status, field, mapSuffix, total);
-    });
-  }
-
-  private updateProgressField(status: SearchStatus, field: keyof SearchStatus, mapSuffix: string, total: number) {
-    const value = Number(status[field]);
-    const fieldElement = this.fieldMap[field + mapSuffix];
-    fieldElement.title = `${field}: ${value}`
-    const percentage = (value / total) * 100;
-    fieldElement.style.width = percentage + '%';
+    this.progressBarTotal.update(status, status.initialQueue);
+    this.progressBarDetails.update(status, status.detailsRequested);
   }
 }

@@ -1,11 +1,13 @@
 import type {IITC} from "../../types/iitc";
 import type {WmCondition, WmConfig} from "../config/config";
+import {asnc, sleep} from "../utils/helpers";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
 import {getMarker} from "../utils/wasabeeUtils";
 
 export class SearchStatus {
   readonly initialQueue: number;
+  readonly startTime: number;
 
   detailsRequested = 0;
   detailsLoaded = 0;
@@ -17,6 +19,7 @@ export class SearchStatus {
 
   constructor(private queue: IITC.Portal[], public running = false) {
     this.initialQueue = queue.length;
+    this.startTime = new Date().getTime();
   }
 
   get remaining(): number {
@@ -29,6 +32,23 @@ export class SearchStatus {
 
   get ok(): number {
     return this.done - this.errors;
+  }
+
+  get runningRequests(): number {
+    return this.detailsRequested - this.detailsCached - this.detailsLoaded - this.errors;
+  }
+
+  get duration(): number {
+    return (new Date().getTime() - this.startTime);
+  }
+
+  get durationText(): string {
+    const dur = this.duration;
+    const hours = Math.trunc(dur / 3600000) % 24;
+    const minutes = String(Math.trunc(dur / 60000) % 60).padStart(2, '0');
+    const seconds = String(Math.trunc(dur / 1000) % 60).padStart(2, '0');
+    const millis = String(Math.trunc(dur) % 1000).padStart(3, '0');
+    return `${hours}h ${minutes}m ${seconds}s ${millis}ms`;
   }
 
   get totalMarkers(): number {
@@ -68,43 +88,45 @@ export class WmSearch extends EventTarget {
     super();
   }
 
-  private prepareQueue(): IITC.Portal[] {
-    return Object.values(portals).filter((portal) => this.checkLocation(portal))
-  }
-
   start() {
     if (!this.status.running && this.hasConditions()) {
-      this.search().finally(() => this.stop());
+      this.startSearch();
     }
   }
 
-  public hasConditions(): boolean {
+  hasConditions(): boolean {
     return this.config.conditions && this.config.conditions.length > 0;
   }
 
   stop() {
     this.status.running = false;
+    this.done();
+  }
+
+  private prepareQueue(): IITC.Portal[] {
+    return Object.values(portals).filter((portal) => this.checkLocation(portal))
+  }
+
+  private done() {
     this.markProgress();
     this.markProgress('done');
   }
 
-  private search(): Promise<void> {
+  private startSearch(): void {
     this.status = new SearchStatus([], true);
-    this.markProgress();
+    this.progressMarkingLoop();
 
-    return new Promise<void>(resolve => {
-      setTimeout(() => {
-        this.status = new SearchStatus(this.prepareQueue(), true);
-        this.markProgress();
+    asnc(() => this.search())
+      .finally(() => this.stop());
+  }
 
-        this.lastRequest = 0;
-        const promises: Promise<void>[] = [];
-        for (let i = 0; i < this.config.portalDetailThreads; i++) {
-          promises.push(this.startCheckingLoop());
-        }
-        Promise.all(promises).finally(() => resolve());
-      }, 0);
-    });
+  private search(): Promise<Awaited<void>[]> {
+    this.status = new SearchStatus(this.prepareQueue(), true);
+
+    this.lastRequest = 0;
+    return Promise.all(Array(this.config.portalDetailThreads)
+      .fill(0)
+      .map(() => asnc(() => this.checkingLoop())));
   }
 
   private checkLocation(portalNode: IITC.Portal): boolean {
@@ -143,18 +165,13 @@ export class WmSearch extends EventTarget {
     return window.map.getBounds().contains(portalNode.getLatLng());
   }
 
-  private async startCheckingLoop(): Promise<void> {
+  private async checkingLoop(): Promise<void> {
     while (this.status.running && this.status.hasNext()) {
-      try {
-        this.markProgress();
-        await this.checkNode(this.status.next());
-      } finally {
-        this.markProgress();
-      }
+      await this.checkNode(this.status.next());
     }
   }
 
-  private async checkNode(portalNode?: IITC.Portal) {
+  private async checkNode(portalNode?: IITC.Portal): Promise<void> {
     if (this.status.running && portalNode) {
       if (!this.checkLocation(portalNode)) {
         return
@@ -189,8 +206,8 @@ export class WmSearch extends EventTarget {
   }
 
   private getPortalDetail(portalOptions: IITC.PortalOptions): Promise<IITC.PortalDataDetail | undefined> {
+    this.status.detailsRequested++;
     return new Promise<IITC.PortalDataDetail | undefined>((resolve, reject) => {
-      this.status.detailsRequested++;
       const portalGuid = portalOptions.guid;
       if (portalDetail.isFresh(portalGuid)) {
         const portalDetailData = portalDetail.get(portalGuid)
@@ -206,16 +223,15 @@ export class WmSearch extends EventTarget {
           timeout = this.config.portalDetailRequestDelay - timeDiff;
         }
         this.lastRequest = new Date().getTime() + timeout;
-        setTimeout(() => {
-          portalDetail.request(portalGuid)
-            .then(portalDetailData => {
-              this.status.detailsLoaded++;
-              resolve(portalDetailData);
-            })
-            .catch(() => {
-              reject();
-            });
-        }, timeout);
+        sleep(timeout)
+          .then(() => portalDetail.request(portalGuid))
+          .then(portalDetailData => {
+            this.status.detailsLoaded++;
+            resolve(portalDetailData);
+          })
+          .catch(() => {
+            reject();
+          });
       }
     });
   }
@@ -224,7 +240,7 @@ export class WmSearch extends EventTarget {
     return condition.factions.indexOf(portalOptions.team) >= 0;
   }
 
-  private markProgress(type: string = 'progress') {
+  private markProgress(type = 'progress') {
     this.dispatchEvent(new CustomEvent('wasabee_markers:' + type, {detail: this.status}));
   }
 
@@ -263,5 +279,14 @@ export class WmSearch extends EventTarget {
       .find(portalMod =>
         condition.mods
           .find(conditionMod => portalMod?.rarity == conditionMod.rarity && portalMod.name == conditionMod.type));
+  }
+
+  private progressMarkingLoop() {
+    setTimeout(() => {
+      if (this.status.running) {
+        this.markProgress();
+        this.progressMarkingLoop();
+      }
+    }, 250);
   }
 }

@@ -16,7 +16,7 @@ declare global {
      * Request Portal details from server
      * NB: you shouldn't use it.
      */
-    request(guid: string): JQuery.Promise<any>;
+    request(guid: string): JQuery.Promise<IITC.PortalDataDetail>;
   }
 
   var portalDetail: PortalDetail;

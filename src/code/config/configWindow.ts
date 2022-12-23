@@ -32,12 +32,13 @@ export class ConfigWindow extends Dialog {
       }
     },
     {
-      text: "Save", click: () => {
+      text: "Save",
+      click: () => {
         this.search.config.save();
       }
     }, {
-      text:
-        "Close", click: () => {
+      text: "Close",
+      click: () => {
         this.closeDialog();
       }
     }];

@@ -19,7 +19,7 @@ export class ActionButton extends L.Control {
     this.progress = L.DomUtil.create('div', 'progress', this.progressBar);
 
     L.DomEvent.addListener(this.containerDiv, 'click', () => {
-      if (this.search.config.conditions && this.search.config.conditions.length > 0) {
+      if (this.search.hasConditions()) {
         this.searchTears();
       } else {
         this.showConfigWindow();

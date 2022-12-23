@@ -94,7 +94,7 @@ export class ConditionDialog extends Dialog {
   }
 
   private createFactionField() {
-    const values = TEAM_CODES.map((_, index) => index).filter(value => value != 0);
+    const values = TEAM_CODES.map((_, index) => index);
     return new LabeledArrayField('factions', 'Factions', values, (_, item, container) => {
       const element = L.DomUtil.create('div', TEAM_TO_CSS[item], container);
       element.textContent = TEAM_NAMES[item];

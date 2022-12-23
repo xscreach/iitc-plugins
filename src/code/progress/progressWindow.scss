@@ -2,6 +2,10 @@
   .form {
     grid-template-columns: auto max-content !important;
 
+    & > label {
+      text-align: right;
+    }
+
     div[data-value="preparing"]::before {
       content: "🟠";
     }
@@ -16,15 +20,6 @@
   }
 
   .progress-bar {
-    width: 100%;
-    border: 1px solid #ffce00;
-
-    & > * {
-      display: inline-block;
-      text-align: center;
-      height: 1rem;
-    }
-
     .ok, .detailsLoaded {
       background: green;
     }
@@ -34,7 +29,7 @@
     }
 
     .detailsCached {
-     background: yellow;
+      background: yellow;
     }
   }
 }
