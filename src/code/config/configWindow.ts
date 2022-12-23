@@ -67,14 +67,20 @@ export class ConfigWindow extends Dialog {
       dialogClass: "wm-config",
       buttons: this.buttons,
       id: 'wm-config',
-      closeCallback: () => this.search.config = WmConfigHolder.config.copy()
+      closeCallback: () => { this.search.config = WmConfigHolder.config.copy() }
     });
   }
 
   private createForm() {
+    let strings: { [key: string]: string } = {};
+    if (plugin.wasabee?.static.strings) {
+      const language = localStorage['wasabee-language'] || 'English'
+      strings = plugin.wasabee?.static.strings[language]
+    }
+
     const options = Array(Object.keys(WasabeeMarker).length / 2)
       .fill(0)
-      .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], WasabeeMarker[index]));
+      .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], strings[WasabeeMarker[index]] || WasabeeMarker[index]));
     const formConfig = [
       new BooleanCheckBoxField("keepScanning", "Scan when map with portals loaded"),
       new BooleanCheckBoxField("autoUpload", "Upload operation when done"),
