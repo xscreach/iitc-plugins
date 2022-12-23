@@ -1,9 +1,8 @@
 import type {IITC} from "../../types/iitc";
 import type {WmCondition, WmConfig} from "../config/config";
-import {asnc, sleep} from "../utils/helpers";
+import {sleep} from "../utils/helpers";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
-import {getMarker} from "../utils/wasabeeUtils";
 
 export class SearchStatus {
   readonly initialQueue: number;
@@ -116,17 +115,19 @@ export class WmSearch extends EventTarget {
     this.status = new SearchStatus([], true);
     this.progressMarkingLoop();
 
-    asnc(() => this.search())
+    sleep(0)
+      .then(() => this.search())
       .finally(() => this.stop());
   }
 
-  private search(): Promise<Awaited<void>[]> {
+  private search(): Promise<void[]> {
     this.status = new SearchStatus(this.prepareQueue(), true);
 
     this.lastRequest = 0;
-    return Promise.all(Array(this.config.portalDetailThreads)
+    return Promise.all(Array(Number(this.config.portalDetailThreads))
       .fill(0)
-      .map(() => asnc(() => this.checkingLoop())));
+      .map(() => sleep(0).then(() => this.checkingLoop()))
+    );
   }
 
   private checkLocation(portalNode: IITC.Portal): boolean {
@@ -250,7 +251,7 @@ export class WmSearch extends EventTarget {
   }
 
   private addMarker(portalNode: IITC.Portal) {
-    const marker = getMarker(this.config.markerType, portalNode.options.guid)
+    const marker = WU.getMarker(this.config.markerType, portalNode.options.guid)
     if (!marker) {
       WU.addMarker(this.config.markerType, portalNode.options.guid, portalNode.getLatLng(), portalNode.options.data.title)
       this.status.added++;
@@ -258,7 +259,7 @@ export class WmSearch extends EventTarget {
   }
 
   private removeMarker(portalNode: IITC.Portal) {
-    const marker = getMarker(this.config.markerType, portalNode.options.guid)
+    const marker = WU.getMarker(this.config.markerType, portalNode.options.guid)
     if (marker) {
       WU.removeMarker(marker);
       this.status.removed++;
