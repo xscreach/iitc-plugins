@@ -5,8 +5,8 @@ export const WmComparatorTypes: { [key: string]: string } = {
   '>': 'Greater than',
   '>=': 'Greater or equal',
   '==': 'Equal',
-  '=<': 'Less or equal',
-  '<': 'Less than'
+  '<=': 'Smaller or equal',
+  '<': 'Smaller than'
 }
 
 export const WmModRarity: { [key: string]: string } = {

@@ -1,6 +1,6 @@
 import type {IITC} from "../../types/iitc";
 import type {WmCondition, WmConfig, WmRule} from "../config/config";
-import {copy, sleep} from "../utils/helpers";
+import {sleep} from "../utils/helpers";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
 
@@ -280,20 +280,28 @@ export class WmSearch extends EventTarget {
 
   private async checkPortalDetails(originalRules: WmRule[], portalNode: IITC.Portal) {
     const portalOptions = portalNode.options;
-    originalRules = copy(originalRules);
 
-    const rules = originalRules.filter(rule => {
-      rule.conditions = rule.conditions.filter(condition => this.checkSimpleConditions(condition, portalOptions));
-      return rule.conditions.length > 0;
+    const rules: WmRule[] = [];
+
+    originalRules.forEach(rule => {
+      const conditions = rule.conditions.filter(condition => this.checkSimpleConditions(condition, portalOptions));
+      if (conditions.length > 0) {
+        rules.push({name: rule.name, markerType: rule.markerType, conditions: conditions})
+      } else {
+        this.removeMarker(portalNode, rule.markerType);
+      }
     });
 
-    originalRules.filter(r => !rules.includes(r)).forEach(rule => this.removeMarker(portalNode, rule.markerType));
-
     if (rules.length > 0) {
-      const simpleRules = rules.filter((rule) => rule.conditions.find(c => !c.mods || c.mods.length === 0));
-      simpleRules.forEach((rule) => this.addMarker(portalNode, rule.markerType));
+      const complexRules: WmRule[] = []
+      rules.forEach(rule => {
+        if (rule.conditions.find(c => !c.mods || c.mods.length === 0)) {
+          this.addMarker(portalNode, rule.markerType);
+        } else {
+          complexRules.push(rule);
+        }
+      });
 
-      const complexRules = rules.filter(r => !simpleRules.includes(r));
       if (complexRules.length > 0) {
         try {
           const portalDetail = await this.getPortalDetail(portalOptions);

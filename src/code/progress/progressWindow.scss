@@ -6,16 +6,18 @@
       text-align: right;
     }
 
-    div[data-value="preparing"]::before {
-      content: "🟠";
-    }
+    div.status {
+      &[data-value="preparing"]::before {
+        content: "🟠";
+      }
 
-    div[data-value="running"]::before {
-      content: "🟢";
-    }
+      &[data-value="running"]::before {
+        content: "🟢";
+      }
 
-    div[data-value="done"]::before {
-      content: "🔴";
+      &[data-value="done"]::before {
+        content: "🔴";
+      }
     }
   }
 
