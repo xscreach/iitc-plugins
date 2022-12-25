@@ -29,12 +29,13 @@ export function removeMarker(marker: any) {
 export function getPortalMarkers(guid: string) {
   if (plugin.wasabee) {
     const markers = plugin.wasabee._selectedOp.markers;
-    return markers.find((marker: { portalId: string }) => marker.portalId === guid);
+    return markers.filter((marker: { portalId: string }) => marker.portalId === guid);
   }
 }
 
 export function getMarker(markerType: string, guid: string) {
-  return getPortalMarkers(guid)?.find((marker: { type: string; }) => marker.type === markerType);
+  const portalMarkers = getPortalMarkers(guid);
+  return portalMarkers && portalMarkers.find((marker: { type: string; }) => marker.type === markerType);
 }
 
 export function getWasabeeStrings() {
