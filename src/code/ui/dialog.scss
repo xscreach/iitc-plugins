@@ -1,4 +1,10 @@
 .wm-dialog {
+  .container .ui-dialog-buttonpane {
+    border-top: none;
+    margin-top: 10px;
+    padding: 0;
+  }
+
   button {
     margin-left: 2px;
 

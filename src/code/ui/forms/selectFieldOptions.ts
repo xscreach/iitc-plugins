@@ -22,7 +22,7 @@ export class SelectField extends FieldBasics {
     const optionElement = L.DomUtil.create('option');
     optionElement.value = option.value;
     optionElement.title = option.value;
-    optionElement.textContent = option.text;
+    optionElement.innerText = option.text;
     return optionElement;
   }
 }

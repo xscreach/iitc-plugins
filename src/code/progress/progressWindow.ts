@@ -53,6 +53,10 @@ export class ProgressWindow extends Dialog {
     this.createDivs(Object.keys(ProgressWindow.fields));
     this.progressBarTotal = new ProgressBar(['ok', 'errors'])
     this.progressBarDetails = new ProgressBar(['detailsCached', 'detailsLoaded', 'errors'])
+
+    this.search.addEventListener('wasabee_markers:progress', () => {
+      this.updateStatus(this.search.status);
+    });
   }
 
   enable(): this {

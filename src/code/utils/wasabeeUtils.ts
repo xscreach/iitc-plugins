@@ -33,4 +33,17 @@ export function getMarker(markerType: string, guid: string) {
   }
 }
 
+export function getWasabeeStrings() {
+  let strings: { [key: string]: string } = {};
+  if (plugin.wasabee?.static.strings) {
+    const language = localStorage['wasabee-language'] || 'English';
+    strings = plugin.wasabee?.static.strings[language];
+  }
+  return strings;
+}
+
+export function getMarkerTypeName(markerType: string): string {
+  return getWasabeeStrings()[markerType] || markerType;
+}
+
 

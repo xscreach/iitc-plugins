@@ -1,5 +1,6 @@
 import type {IITC} from "../../types/iitc";
 import type {WmCondition, WmConfig} from "../config/config";
+import type {WmRule} from "../config/config";
 import {sleep} from "../utils/helpers";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
@@ -85,16 +86,22 @@ export class WmSearch extends EventTarget {
 
   constructor(public config: WmConfig) {
     super();
+
+    addHook("mapDataRefreshEnd", () => {
+      if (getDataZoomForMapZoom(map.getZoom()) >= 15 && this.config.keepScanning) {
+        this.start();
+      }
+    });
   }
 
   start() {
-    if (!this.status.running && this.hasConditions()) {
+    if (!this.status.running && this.hasRules()) {
       this.startSearch();
     }
   }
 
-  hasConditions(): boolean {
-    return this.config.conditions && this.config.conditions.length > 0;
+  hasRules(): boolean {
+    return this.config.rules && this.config.rules.length > 0 && !!this.config.rules.find(value => value.conditions && value.conditions.length > 0);
   }
 
   stop() {
@@ -107,12 +114,15 @@ export class WmSearch extends EventTarget {
   }
 
   private done() {
+    if (this.config.autoUpload && (this.status.added > 0 || this.status.removed > 0)) {
+      plugin.wasabee?.buttons.options.buttons.get("uploadButton").button.click();
+    }
     this.markProgress();
-    this.markProgress('done');
   }
 
   private startSearch(): void {
     this.status = new SearchStatus([], true);
+    this.markProgress();
     this.progressMarkingLoop();
 
     sleep(0)
@@ -178,30 +188,9 @@ export class WmSearch extends EventTarget {
         return
       }
 
-      const portalOptions = portalNode.options;
-      const conditions = this.config.conditions.filter(condition => this.checkTeam(condition, portalOptions) && this.checkLevel(condition, portalOptions))
-
-      if (conditions.length > 0) {
-        if (conditions.find(c => !c.mods || c.mods.length === 0)) {
-          // no mods in condition, can mark immediately - nothing more to check
-          this.addMarker(portalNode);
-        } else {
-          try {
-            const portalDetailData = await this.getPortalDetail(portalOptions);
-            if (portalDetailData) {
-              if (this.checkPortalDetails(conditions, portalDetailData, portalOptions)) {
-                this.addMarker(portalNode);
-              } else {
-                this.removeMarker(portalNode);
-              }
-            }
-          } catch (e) {
-            console.log("Error");
-            this.status.errors++;
-          }
-        }
-      } else {
-        this.removeMarker(portalNode);
+      let portalDetail = undefined;
+      for (const rule in this.config.rules) {
+        portalDetail = await this.checkPortalDetails(this.config.rules[rule], portalNode, portalDetail);
       }
     }
   }
@@ -241,8 +230,8 @@ export class WmSearch extends EventTarget {
     return condition.factions.indexOf(portalOptions.team) >= 0;
   }
 
-  private markProgress(type = 'progress') {
-    this.dispatchEvent(new CustomEvent('wasabee_markers:' + type, {detail: this.status}));
+  private markProgress() {
+    this.dispatchEvent(new CustomEvent('wasabee_markers:progress', {detail: this.status}));
   }
 
   private checkLevel(condition: WmCondition, portalOptions: IITC.PortalOptions): boolean {
@@ -250,23 +239,23 @@ export class WmSearch extends EventTarget {
     return value.toLowerCase() == 'true';
   }
 
-  private addMarker(portalNode: IITC.Portal) {
-    const marker = WU.getMarker(this.config.markerType, portalNode.options.guid)
+  private addMarker(portalNode: IITC.Portal, markerType: string) {
+    const marker = WU.getMarker(markerType, portalNode.options.guid)
     if (!marker) {
-      WU.addMarker(this.config.markerType, portalNode.options.guid, portalNode.getLatLng(), portalNode.options.data.title)
+      WU.addMarker(markerType, portalNode.options.guid, portalNode.getLatLng(), portalNode.options.data.title)
       this.status.added++;
     }
   }
 
-  private removeMarker(portalNode: IITC.Portal) {
-    const marker = WU.getMarker(this.config.markerType, portalNode.options.guid)
+  private removeMarker(portalNode: IITC.Portal, markerType: string) {
+    const marker = WU.getMarker(markerType, portalNode.options.guid)
     if (marker) {
       WU.removeMarker(marker);
       this.status.removed++;
     }
   }
 
-  private checkPortalDetails(conditions: WmCondition[], portalDetailData: IITC.PortalDataDetail, portalNodeOptions: IITC.PortalOptions) {
+  private checkPortalDetailsConditions(conditions: WmCondition[], portalDetailData: IITC.PortalDataDetail, portalNodeOptions: IITC.PortalOptions) {
     return conditions
       .find(condition =>
         this.checkTeam(condition, portalNodeOptions)
@@ -289,5 +278,37 @@ export class WmSearch extends EventTarget {
         this.progressMarkingLoop();
       }
     }, 250);
+  }
+
+  private async checkPortalDetails(rule: WmRule, portalNode: IITC.Portal, portalDetail?: IITC.PortalDataDetail) {
+    const portalOptions = portalNode.options;
+    const conditions = rule.conditions.filter(condition => this.checkTeam(condition, portalOptions) && this.checkLevel(condition, portalOptions))
+
+    if (conditions.length > 0) {
+      if (conditions.find(c => !c.mods || c.mods.length === 0)) {
+        // no mods in condition, can mark immediately - nothing more to check
+        this.addMarker(portalNode, rule.markerType);
+      } else {
+        try {
+          if (!portalDetail) {
+            portalDetail = await this.getPortalDetail(portalOptions);
+          }
+
+          if (portalDetail) {
+            if (this.checkPortalDetailsConditions(conditions, portalDetail, portalOptions)) {
+              this.addMarker(portalNode, rule.markerType);
+            } else {
+              this.removeMarker(portalNode, rule.markerType);
+            }
+          }
+        } catch (e) {
+          console.log("Error");
+          this.status.errors++;
+        }
+      }
+    } else {
+      this.removeMarker(portalNode, rule.markerType);
+    }
+    return portalDetail;
   }
 }

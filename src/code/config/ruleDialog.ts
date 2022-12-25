@@ -1,0 +1,133 @@
+import {WasabeeMarker} from "../globals";
+import {Dialog} from "../ui/dialog";
+import {Form} from "../ui/forms/forms";
+import {InputField} from "../ui/forms/inputField";
+import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
+import {Table} from "../ui/table";
+import {copy} from "../utils/helpers";
+import {getMarkerTypeName} from "../utils/wasabeeUtils";
+import {ConditionDialog} from "./conditionDialog";
+import {WmCondition, WmConfig, WmModRarityText, WmRule} from "./config";
+import "./ruleDialog.scss";
+
+export class RuleDialog extends Dialog {
+  private readonly rule: WmRule;
+  private readonly form: Form;
+  private readonly table: Table<WmCondition>;
+
+  constructor(private readonly config: WmConfig, private readonly originalRule?: WmRule) {
+    super();
+    if (originalRule) {
+      this.rule = copy(originalRule);
+    } else {
+      this.rule = new WmRule();
+    }
+
+    this.form = this.createForm();
+    this.table = new Table(this.rule.conditions, [
+      {
+        name: 'condition',
+        valueRenderer: (element, condition) => {
+          element.classList.add('wm-condition-condition')
+          const conditionAnchor = L.DomUtil.create('a', undefined, element);
+          conditionAnchor.title = 'Edit';
+          conditionAnchor.addEventListener('click', () => this.conditionDialog(condition));
+          conditionAnchor.innerText = this.getConditionString(condition);
+        }
+      },
+      {
+        name: 'actions',
+        width: '5%',
+        valueRenderer: (element, _, index) => {
+          const dlt = L.DomUtil.create('a', 'wm-condition-action-delete', element);
+          dlt.title = 'Delete';
+          dlt.innerText = 'x';
+          dlt.addEventListener('click', () => {
+            this.rule.conditions.splice(index, 1);
+            this.updateWindow();
+          });
+        }
+      }
+    ], 'No conditions defined.');
+  }
+
+  private getConditionString(condition: WmCondition): string {
+    const factions = condition.factions.map(value => TEAM_NAMES[value]).join(', ');
+    let conditionText = `(${factions}) ${String(condition.levelComparator)} ${String(condition.level)}`;
+    if (condition.mods && condition.mods.length > 0) {
+      conditionText += ` + [${condition.mods.map(v => WmModRarityText[v.rarity] + " " + v.type).join(", ")}]`
+    }
+    return conditionText;
+  }
+
+  addHooks() {
+    const html = L.DomUtil.create("div", "container");
+
+    html.append(this.form.html());
+    this.table.appendTo(html);
+
+    const buttonPane = L.DomUtil.create('div', 'ui-dialog-buttonpane', html);
+    const buttonSet = L.DomUtil.create('div', 'ui-dialog-buttonset', buttonPane);
+    const button = L.DomUtil.create('button', 'ui-button', buttonSet);
+    button.innerText = 'Add Condition';
+    button.addEventListener('click', () => {
+      this.conditionDialog();
+    });
+
+    let title = "New rule";
+    let id = 'wm-config-rule';
+    let okButton = 'Add';
+
+    if (this.originalRule) {
+      title = 'Editing rule ' + this.originalRule.name;
+      id += '-' + this.originalRule?.name.replace(/\s+/g, '-');
+      okButton = 'Save'
+    }
+
+    this.createDialog({
+      title: title,
+      html: html,
+      width: "350",
+      dialogClass: "wm-config-rule",
+      buttons: {
+        [okButton]: () => {
+          this.save();
+          this.closeDialog();
+        },
+        "Close": () => {
+          this.closeDialog();
+        }
+      },
+      id: id
+    });
+  }
+
+  private save() {
+    if (this.originalRule) {
+      Object.assign(this.originalRule, this.rule);
+    } else {
+      this.config.rules.push(this.rule);
+    }
+  }
+
+  private createForm() {
+    const options = Array(Object.keys(WasabeeMarker).length / 2)
+      .fill(0)
+      .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], getMarkerTypeName(WasabeeMarker[index])));
+    const formConfig = [
+      new InputField("name", "Rule name"),
+      new SelectField("markerType", "Marker type", options),
+    ];
+    return new Form(this.rule, formConfig);
+  }
+
+  private conditionDialog(condition ?: WmCondition) {
+    new ConditionDialog(this.rule, condition)
+      .onClose(() => this.updateWindow())
+      .enable();
+  }
+
+  private updateWindow() {
+    this.table.update();
+  }
+}

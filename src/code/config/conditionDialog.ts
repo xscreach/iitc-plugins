@@ -1,17 +1,17 @@
-import {WmComparatorTypes, WmCondition, WmConfig, WmModRarityText, WmModTypes} from "./config";
 import {Dialog} from "../ui/dialog";
 import type {Field} from "../ui/forms/field";
 import {Form} from "../ui/forms/forms";
 import {LabeledArrayField} from "../ui/forms/labeledArrayField";
 import {NumberInputField} from "../ui/forms/numberInputField";
 import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
+import {WmComparatorTypes, WmCondition, WmModRarityText, WmModTypes, WmRule} from "./config";
 
 export class ConditionDialog extends Dialog {
   private readonly isNew: boolean;
   private readonly condition: WmCondition;
   private form: Form;
 
-  constructor(private config: WmConfig, condition: WmCondition | undefined = undefined) {
+  constructor(private rule: WmRule, condition: WmCondition | undefined = undefined) {
     super();
     if (!condition) {
       this.isNew = true;
@@ -49,7 +49,7 @@ export class ConditionDialog extends Dialog {
       fieldRows.push(new LabeledArrayField('mods', modType, modValues, (_, item, parent) => {
         const element = L.DomUtil.create('div', `${modType.replace(/\s/, '_')}`, parent);
         element.classList.add(item.rarity.replace(/\s/, '_'))
-        element.textContent = WmModRarityText[item.rarity];
+        element.innerText = WmModRarityText[item.rarity];
       }))
     });
     return fieldRows;
@@ -69,7 +69,7 @@ export class ConditionDialog extends Dialog {
       [okButtonName]: () => {
         Object.assign(this.condition, this.form.model);
         if (this.isNew) {
-          this.config.conditions.push(this.condition);
+          this.rule.conditions.push(this.condition);
         }
         this.closeDialog();
       },
@@ -81,7 +81,7 @@ export class ConditionDialog extends Dialog {
     const title = this.isNew ? 'New' : 'Edit';
     let id = 'wm-config-condition';
     if (!this.isNew) {
-      id += '-' + this.config.conditions.indexOf(this.condition);
+      id += '-' + this.rule.conditions.indexOf(this.condition);
     }
     this.createDialog({
       title: `${title} Condition`,
@@ -97,7 +97,7 @@ export class ConditionDialog extends Dialog {
     const values = TEAM_CODES.map((_, index) => index);
     return new LabeledArrayField('factions', 'Factions', values, (_, item, container) => {
       const element = L.DomUtil.create('div', TEAM_TO_CSS[item], container);
-      element.textContent = TEAM_NAMES[item];
+      element.innerText = TEAM_NAMES[item];
     });
   }
 }

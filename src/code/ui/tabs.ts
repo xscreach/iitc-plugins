@@ -1,14 +1,21 @@
+import "./tabs.scss"
+
+export interface TabConfig {
+  title: string,
+  content: HTMLDivElement
+}
+
 export class Tabs {
+
+  private readonly container: HTMLDivElement ;
   private tabs: Tab[];
   private selectedTab = 0;
 
-  constructor(tabs: Tab[]) {
-    this.tabs = tabs;
-  }
+  constructor(tabs: TabConfig[], parent?: HTMLElement) {
+    this.container = L.DomUtil.create('div', 'ui-tabs tabs wm-tabs', parent)
+    this.tabs = tabs.map(t => new Tab(t.title, t.content));
 
-  html() {
-    const tabs = L.DomUtil.create("div", "ui-tabs tabs");
-    const nav = L.DomUtil.create("ul", "ui-tabs-nav nav", tabs);
+    const nav = L.DomUtil.create("ul", "ui-tabs-nav nav", this.container);
 
     this.tabs.forEach((tab, i) => {
       L.DomUtil
@@ -19,48 +26,42 @@ export class Tabs {
         this.tabs[i].activate();
         this.selectedTab = i;
       });
-      tabs.appendChild(tab.content);
+      this.container.appendChild(tab.content);
     });
 
     if (this.tabs.length > 0) {
       this.tabs[0].activate();
     }
+  }
 
-    return tabs;
+  public appendTo(elementTo: HTMLElement) {
+    elementTo.append(this.container);
   }
 }
 
-export class Tab {
-  get content(): HTMLDivElement {
-    return this._content;
-  }
-
-  get header(): HTMLAnchorElement {
-    return this._header;
-  }
-
-  private readonly _header: HTMLAnchorElement;
-  private readonly _content: HTMLDivElement;
+class Tab {
+  public readonly header: HTMLAnchorElement;
+  public readonly content: HTMLDivElement;
 
   constructor(title: string, content: HTMLDivElement) {
-    this._header = L.DomUtil.create("a");
-    this._header.textContent = title;
-    this._header.title = title;
-    this._header.classList.add("ui-tabs-anchor");
+    this.header = L.DomUtil.create("a");
+    this.header.innerText = title;
+    this.header.title = title;
+    this.header.classList.add("ui-tabs-anchor");
 
-    this._content = L.DomUtil.create('div', "ui-tabs-panel");
-    this._content.append(content);
+    this.content = L.DomUtil.create('div', "ui-tabs-panel");
+    this.content.append(content);
 
     this.deactivate();
   }
 
   activate() {
-    this._header.classList.add("ui-tabs-active");
-    this._content.style.display = "block";
+    this.header.classList.add("ui-tabs-active");
+    this.content.style.display = "block";
   }
 
   deactivate() {
-    this._header.classList.remove("ui-tabs-active");
-    this._content.style.display = "none";
+    this.header.classList.remove("ui-tabs-active");
+    this.content.style.display = "none";
   }
 }

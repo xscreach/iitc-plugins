@@ -1,4 +1,5 @@
 import {WasabeeMarker} from "../globals";
+import {copy} from "../utils/helpers";
 
 export const WmComparatorTypes: { [key: string]: string } = {
   '>': 'Greater than',
@@ -47,11 +48,18 @@ export interface WmCondition {
   factions: number[];
 }
 
+export class WmRule {
+  public name = '';
+  public markerType = WasabeeMarker[WasabeeMarker.DestroyPortalAlert];
+  public conditions: WmCondition[] = []
+}
+
 export class WmConfig {
   public static readonly CONFIG_KEY = 'wasabee_markers-config';
 
-  public markerType: string = WasabeeMarker[WasabeeMarker.DestroyPortalAlert]
-  public conditions: WmCondition[] = []
+  public rules: WmRule[] = []
+  public markerType?: string = WasabeeMarker[WasabeeMarker.DestroyPortalAlert]
+  public conditions?: WmCondition[]
   public portalDetailRequestDelay = 250;
   public portalDetailThreads = 5;
   public showProgress = false;
@@ -59,14 +67,13 @@ export class WmConfig {
   public keepScanning = false;
   public autoUpload = true;
 
-
   public save(): void {
     localStorage.setItem(WmConfig.CONFIG_KEY, JSON.stringify(this));
     WmConfigHolder.config = this;
   }
 
   public copy(): WmConfig {
-    return Object.assign(new WmConfig(), JSON.parse(JSON.stringify(this)));
+    return Object.assign(new WmConfig(), copy(this));
   }
 }
 
@@ -77,8 +84,24 @@ export class WmConfigHolder {
     const localConfig = localStorage.getItem(WmConfig.CONFIG_KEY);
     const config = new WmConfig();
     if (localConfig) {
-      Object.assign(config, JSON.parse(localConfig))
+      Object.assign(config, JSON.parse(localConfig));
+      this.migrate(config);
     }
     return config;
+  }
+
+  private static migrate(config: WmConfig) {
+    if (config.conditions && config.conditions.length > 0) {
+      const wmRule = Object.assign(new WmRule(), {
+        conditions: config.conditions,
+        markerType: config.markerType,
+        name: 'Imported Rule'
+      });
+
+      config.rules.push(wmRule);
+      delete config.markerType;
+      delete config.conditions;
+      config.save();
+    }
   }
 }

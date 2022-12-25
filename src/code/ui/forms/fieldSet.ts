@@ -6,7 +6,7 @@ export class FieldSet implements Field {
   html(model: any): HTMLElement[] {
     const fieldset = L.DomUtil.create('fieldset')
     const legendElement = L.DomUtil.create('legend', undefined, fieldset)
-    legendElement.textContent = this.legend
+    legendElement.innerText = this.legend
 
     const fieldSetModel = model[this.fieldName];
     fieldset.append(...this.fields.flatMap(f => f.html(fieldSetModel)));

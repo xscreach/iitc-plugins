@@ -10,7 +10,7 @@ export class LabelField implements Field {
     const labelElement = L.DomUtil.create('label');
     labelElement.htmlFor = this.htmlFor;
     labelElement.title = this.label;
-    labelElement.textContent = this.label;
+    labelElement.innerText = this.label;
     return [labelElement];
   }
 

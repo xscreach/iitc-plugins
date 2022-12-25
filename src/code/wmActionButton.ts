@@ -1,8 +1,7 @@
 import type {ControlOptions} from "leaflet";
 import {ConfigWindow} from "./config/configWindow";
-import type {ProgressWindow} from "./progress/progressWindow";
-import type {SearchStatus, WmSearch} from "./progress/search";
 import * as WM from "./globals";
+import type {SearchStatus, WmSearch} from "./progress/search";
 import "./wmActionButton.scss"
 
 export class ActionButton extends L.Control {
@@ -12,14 +11,18 @@ export class ActionButton extends L.Control {
   private readonly progressBar: HTMLDivElement;
   private readonly containerDiv: HTMLDivElement;
 
-  constructor(private search: WmSearch, private readonly progressWindow: ProgressWindow) {
+  constructor(private search: WmSearch) {
     super();
     this.containerDiv = L.DomUtil.create('div', 'action-button');
     this.progressBar = L.DomUtil.create('div', 'progress-bar');
     this.progress = L.DomUtil.create('div', 'progress', this.progressBar);
 
+    this.search.addEventListener('wasabee_markers:progress', () => {
+      this.updateStatus(this.search.status);
+    });
+
     L.DomEvent.addListener(this.containerDiv, 'click', () => {
-      if (this.search.hasConditions()) {
+      if (this.search.hasRules()) {
         this.searchTears();
       } else {
         this.showConfigWindow();
@@ -36,7 +39,6 @@ export class ActionButton extends L.Control {
 
   private searchTears(): void {
     this.search.start();
-    this.progressWindow.enable();
     this.updateStatus(this.search.status);
   }
 
@@ -67,6 +69,6 @@ export class ActionButton extends L.Control {
   }
 
   private showConfigWindow() {
-    new ConfigWindow(this.search, this.progressWindow).enable();
+    new ConfigWindow(this.search).enable();
   }
 }

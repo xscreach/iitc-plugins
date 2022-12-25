@@ -1,36 +1,28 @@
-import {WasabeeMarker} from "../globals";
-import type {ProgressWindow} from "../progress/progressWindow";
 import type {WmSearch} from "../progress/search";
 import {Dialog} from "../ui/dialog";
 import {BooleanCheckBoxField} from "../ui/forms/booleanCheckBoxField";
 import {Form} from "../ui/forms/forms";
 import {NumberInputField} from "../ui/forms/numberInputField";
-import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
-import {ConditionDialog} from "./conditionDialog";
-import {WmCondition, WmConfigHolder, WmModRarityText} from "./config";
+import {Table} from "../ui/table";
+import {Tabs} from "../ui/tabs";
+import {getMarkerTypeName} from "../utils/wasabeeUtils";
+import {WmConfigHolder, WmRule} from "./config";
 import "./configWindow.scss";
+import {RuleDialog} from "./ruleDialog";
 
 export class ConfigWindow extends Dialog {
 
-  private readonly table: HTMLDivElement;
   private form: Form;
 
   private readonly searchButton: JQueryUI.ButtonOptions = {
     text: 'Search',
     click: () => {
       this.search.start();
-      this.progress.enable();
     }
   }
 
   private readonly buttons: JQueryUI.ButtonOptions[] = [
     this.searchButton,
-    {
-      text: "Add Condition",
-      click: () => {
-        this.conditionDialog();
-      }
-    },
     {
       text: "Save",
       click: () => {
@@ -42,23 +34,39 @@ export class ConfigWindow extends Dialog {
         this.closeDialog();
       }
     }];
+  private readonly ruleTable: Table<WmRule>;
 
-  constructor(private readonly search: WmSearch, private readonly progress: ProgressWindow) {
+  constructor(private readonly search: WmSearch) {
     super();
-    this.form = this.createForm();
-    this.table = L.DomUtil.create('div', 'wm-condition-table')
     this.updateButtons();
+    this.form = this.createForm();
+    this.ruleTable = this.createRuleTable();
   }
 
   addHooks() {
-    this._displayDialog();
+    this.displayDialog();
   }
 
-  private _displayDialog() {
+  private displayDialog() {
+
+    const ruleTab = this.createRuleTab();
+    const optionsDiv = L.DomUtil.create('div');
+
+    optionsDiv.append(this.form.html());
+
+    const tabs = [
+      {
+        title: 'Rules',
+        content: ruleTab
+      },
+      {
+        title: 'Options',
+        content: optionsDiv
+      }
+    ];
+
     const html = L.DomUtil.create("div", "container");
-    html.append(this.form.html());
-    this.renderTable();
-    html.append(this.table);
+    new Tabs(tabs).appendTo(html);
 
     this.createDialog({
       title: "Wasabee Marker Config",
@@ -66,87 +74,93 @@ export class ConfigWindow extends Dialog {
       width: "350",
       dialogClass: "wm-config",
       buttons: this.buttons,
-      id: 'wm-config',
-      closeCallback: () => { this.search.config = WmConfigHolder.config.copy() }
+      id: 'wm-config'
     });
   }
 
-  private createForm() {
-    let strings: { [key: string]: string } = {};
-    if (plugin.wasabee?.static.strings) {
-      const language = localStorage['wasabee-language'] || 'English'
-      strings = plugin.wasabee?.static.strings[language]
-    }
+  closeDialog() {
+    this.search.config = WmConfigHolder.config.copy();
+    super.closeDialog();
+  }
 
-    const options = Array(Object.keys(WasabeeMarker).length / 2)
-      .fill(0)
-      .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], strings[WasabeeMarker[index]] || WasabeeMarker[index]));
+  private createRuleTab() {
+    const ruleTab = L.DomUtil.create('div');
+    this.ruleTable.appendTo(ruleTab);
+
+    const buttonPane = L.DomUtil.create('div', 'ui-dialog-buttonpane', ruleTab);
+    const buttonSet = L.DomUtil.create('div', 'ui-dialog-buttonset', buttonPane);
+    const button = L.DomUtil.create('button', 'ui-button', buttonSet);
+    button.innerText = 'Add Rule';
+    button.addEventListener('click', () => {
+      this.ruleDialog();
+    });
+
+    return ruleTab;
+  }
+
+  private updateWindow() {
+    this.ruleTable.update();
+    this.updateButtons();
+  }
+
+  private createLink(c: HTMLDivElement, innerText: string, title: string, onClick: () => void) {
+    const dlt = L.DomUtil.create('a', undefined, c);
+    dlt.title = title;
+    dlt.innerText = innerText;
+    dlt.addEventListener('click', onClick);
+  }
+
+  private createForm() {
     const formConfig = [
       new BooleanCheckBoxField("keepScanning", "Scan when map with portals loaded"),
       new BooleanCheckBoxField("autoUpload", "Upload operation when done"),
       new BooleanCheckBoxField("showProgress", "Show progress"),
       new BooleanCheckBoxField("showResults", "Show results"),
       new NumberInputField("portalDetailThreads", "Max simultaneous portal detail requests", 1),
-      new NumberInputField("portalDetailRequestDelay", "Delay between portal detail requests (ms)", 0),
-      new SelectField("markerType", "Marker type", options),
+      new NumberInputField("portalDetailRequestDelay", "Delay between portal detail requests (ms)", 0)
     ];
     return new Form(this.search.config, formConfig);
   }
 
-  private conditionLine(index: number, condition: WmCondition, html: HTMLDivElement) {
-    const row = L.DomUtil.create('div', 'wm-condition-row', html);
-
-    const id = L.DomUtil.create('div', 'wm-condition-index', row);
-    id.textContent = String(index);
-
-    const conditionElement = L.DomUtil.create('div', 'wm-condition-condition', row);
-    const conditionAnchor = L.DomUtil.create('a', undefined, conditionElement);
-    conditionAnchor.title = 'Edit';
-    conditionAnchor.addEventListener('click', () => this.conditionDialog(condition));
-
-    conditionAnchor.textContent += '('
-    conditionAnchor.textContent += condition.factions.map(value => TEAM_NAMES[value]).join(', ')
-    conditionAnchor.textContent += ') '
-
-    conditionAnchor.textContent += String(condition.levelComparator)
-    conditionAnchor.textContent += ' '
-    conditionAnchor.textContent += String(condition.level);
-
-    if (condition.mods && condition.mods.length > 0) {
-      conditionAnchor.textContent += ` + [${condition.mods.map(v => WmModRarityText[v.rarity] + " " + v.type).join(", ")}]`
-    }
-
-    const actions = L.DomUtil.create('div', 'wm-condition-actions', row);
-
-    const dlt = L.DomUtil.create('a', 'wm-condition-action-delete', actions);
-    dlt.title = 'Delete';
-    dlt.textContent = 'x';
-    dlt.addEventListener('click', () => {
-      this.search.config.conditions.splice(index, 1);
-      this.updateWindow();
-    });
-  }
-
-  private updateWindow() {
-    this.updateButtons();
-    this.renderTable();
-  }
-
-  private renderTable() {
-    L.DomUtil.empty(this.table);
-    this.search.config.conditions.forEach((condition, i) => this.conditionLine(i, condition, this.table))
-  }
-
-  private conditionDialog(condition ?: WmCondition) {
-    new ConditionDialog(this.search.config, condition)
-      .onClose(() => this.updateWindow())
-      .enable();
-  }
-
   private updateButtons() {
-    this.searchButton.disabled = !this.search.hasConditions();
+    this.searchButton.disabled = !this.search.hasRules();
     if (this.enabled()) {
       this.setButtons(this.buttons);
     }
+  }
+
+  private ruleDialog(rule?: WmRule) {
+    new RuleDialog(this.search.config, rule).onClose(() => this.updateWindow()).enable();
+  }
+
+  private createRuleTable() {
+    return new Table(this.search.config.rules, [
+      {
+        name: 'name',
+        valueRenderer: (c, rule) => {
+          this.createLink(c, rule.name, 'Edit', () => {
+            this.ruleDialog(rule);
+          });
+        }
+      },
+      {
+        name: 'markerType',
+        valueRenderer: (c, rule) => {
+          this.createLink(c, getMarkerTypeName(rule.markerType), 'Edit', () => {
+            this.ruleDialog(rule);
+          });
+        }
+      },
+      {
+        name: 'actions',
+        valueRenderer: (c, _, index) => {
+          this.createLink(c, 'X', 'Delete', () => {
+            this.search.config.rules.splice(index, 1);
+            this.updateWindow();
+          });
+        },
+        width: '5%'
+      }
+    ], 'No rules defined');
   }
 }
