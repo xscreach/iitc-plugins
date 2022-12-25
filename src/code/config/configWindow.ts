@@ -130,7 +130,9 @@ export class ConfigWindow extends Dialog {
   }
 
   private ruleDialog(rule?: WmRule) {
-    new RuleDialog(this.search.config, rule).onClose(() => this.updateWindow()).enable();
+    new RuleDialog(this.search.config, rule)
+      .showDialog()
+      ?.then(() => this.updateWindow());
   }
 
   private createRuleTable() {

@@ -19,7 +19,7 @@ window.plugin.wasabeeMarkers.init = function () {
   $('<a>')
     .html(WM.PLUGIN_NAME)
     .attr('title', WM.PLUGIN_NAME)
-    .on("click", () => new ConfigWindow(search).enable())
+    .on("click", () => new ConfigWindow(search).showDialog())
     .appendTo('#toolbox');
 
   window.map.addControl(new ActionButton(search));

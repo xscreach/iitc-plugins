@@ -123,8 +123,8 @@ export class RuleDialog extends Dialog {
 
   private conditionDialog(condition ?: WmCondition) {
     new ConditionDialog(this.rule, condition)
-      .onClose(() => this.updateWindow())
-      .enable();
+      .showDialog()
+      ?.then(() => this.updateWindow());
   }
 
   private updateWindow() {
