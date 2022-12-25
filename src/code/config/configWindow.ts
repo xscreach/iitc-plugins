@@ -136,33 +136,28 @@ export class ConfigWindow extends Dialog {
   }
 
   private createRuleTable() {
-    return new Table(this.search.config.rules, [
-      {
-        name: 'name',
-        valueRenderer: (c, rule) => {
-          this.createLink(c, rule.name, 'Edit', () => {
-            this.ruleDialog(rule);
-          });
-        }
-      },
-      {
-        name: 'markerType',
-        valueRenderer: (c, rule) => {
-          this.createLink(c, getMarkerTypeName(rule.markerType), 'Edit', () => {
-            this.ruleDialog(rule);
-          });
-        }
-      },
-      {
-        name: 'actions',
-        valueRenderer: (c, _, index) => {
-          this.createLink(c, 'X', 'Delete', () => {
-            this.search.config.rules.splice(index, 1);
-            this.updateWindow();
-          });
+    return new Table({
+      rows: this.search.config.rules,
+      columns: [
+        {
+          name: 'name',
+          valueRenderer: (c, rule) => {
+            this.createLink(c, rule.name, 'Edit', () => {
+              this.ruleDialog(rule);
+            });
+          }
         },
-        width: '5%'
-      }
-    ], 'No rules defined');
+        {
+          name: 'markerType',
+          valueRenderer: (c, rule) => {
+            this.createLink(c, getMarkerTypeName(rule.markerType), 'Edit', () => {
+              this.ruleDialog(rule);
+            });
+          }
+        },
+      ],
+      emptyText: 'No rules defined',
+      addDeleteColumn: true
+    });
   }
 }

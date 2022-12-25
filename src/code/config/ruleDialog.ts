@@ -24,31 +24,23 @@ export class RuleDialog extends Dialog {
     }
 
     this.form = this.createForm();
-    this.table = new Table(this.rule.conditions, [
-      {
-        name: 'condition',
-        valueRenderer: (element, condition) => {
-          element.classList.add('wm-condition-condition')
-          const conditionAnchor = L.DomUtil.create('a', undefined, element);
-          conditionAnchor.title = 'Edit';
-          conditionAnchor.addEventListener('click', () => this.conditionDialog(condition));
-          conditionAnchor.innerText = this.getConditionString(condition);
-        }
-      },
-      {
-        name: 'actions',
-        width: '5%',
-        valueRenderer: (element, _, index) => {
-          const dlt = L.DomUtil.create('a', 'wm-condition-action-delete', element);
-          dlt.title = 'Delete';
-          dlt.innerText = 'x';
-          dlt.addEventListener('click', () => {
-            this.rule.conditions.splice(index, 1);
-            this.updateWindow();
-          });
-        }
-      }
-    ], 'No conditions defined.');
+    this.table = new Table({
+      rows: this.rule.conditions,
+      columns: [
+        {
+          name: 'condition',
+          valueRenderer: (element, condition) => {
+            element.classList.add('wm-condition-condition')
+            const conditionAnchor = L.DomUtil.create('a', undefined, element);
+            conditionAnchor.title = 'Edit';
+            conditionAnchor.addEventListener('click', () => this.conditionDialog(condition));
+            conditionAnchor.innerText = this.getConditionString(condition);
+          }
+        },
+      ],
+      emptyText: 'No conditions defined.',
+      addDeleteColumn: true
+    });
   }
 
   private getConditionString(condition: WmCondition): string {

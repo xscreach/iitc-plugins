@@ -6,11 +6,37 @@ export interface ColumnDef<T> {
   width?: string // default 'auto'
 }
 
+export interface TableDef<T> {
+  rows: T[];
+  columns: ColumnDef<T>[]
+  emptyText?: string
+  parent?: HTMLElement
+  addDeleteColumn?: boolean
+}
+
 export class Table<T> {
   private readonly container: HTMLDivElement;
 
-  constructor(private rows: T[], private columns: ColumnDef<T>[], public emptyText = 'Table is empty', parent?: HTMLElement) {
-    this.container = L.DomUtil.create('div', 'wm-table', parent);
+  constructor(private readonly options: TableDef<T>) {
+
+    this.container = L.DomUtil.create('div', 'wm-table', this.options.parent);
+    if (this.options.addDeleteColumn) {
+      this.options.columns.push(
+        {
+          name: 'actions',
+          width: '5%',
+          valueRenderer: (element, _, index) => {
+            const dlt = L.DomUtil.create('a', 'wm-condition-action-delete', element);
+            dlt.title = 'Delete';
+            dlt.innerText = 'x';
+            dlt.addEventListener('click', () => {
+              this.options.rows.splice(index, 1);
+              this.update();
+            });
+          }
+        }
+      );
+    }
     this.update();
   }
 
@@ -20,22 +46,22 @@ export class Table<T> {
 
   public update(rows?: T[]) {
     if (rows) {
-      this.rows = rows;
+      this.options.rows = rows;
     }
 
     L.DomUtil.empty(this.container);
-    if (this.rows.length == 0) {
+    if (this.options.rows.length == 0) {
       const captionColumn = L.DomUtil.create('div', 'wm-table-column', this.container);
-      captionColumn.innerText = this.emptyText;
+      captionColumn.innerText = this.options.emptyText || 'Table is empty';
       this.container.style.gridTemplateColumns = 'auto';
     } else {
-      this.container.style.gridTemplateColumns = this.columns.map(c => c.width || 'auto').join(" ");
-      this.rows.forEach((r, i) => this.renderRow(r, i));
+      this.container.style.gridTemplateColumns = this.options.columns.map(c => c.width || 'auto').join(" ");
+      this.options.rows.forEach((r, i) => this.renderRow(r, i));
     }
   }
 
   private renderRow(value: T, index: number) {
-    this.columns.forEach((c) => this.renderColumn(value, index, c, this.container));
+    this.options.columns.forEach((c) => this.renderColumn(value, index, c, this.container));
   }
 
   private renderColumn(value: T, rowIndex: number, columnDef: ColumnDef<T>, parent: HTMLDivElement) {
