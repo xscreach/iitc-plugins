@@ -1,7 +1,6 @@
 import type {IITC} from "../../types/iitc";
-import type {WmCondition, WmConfig} from "../config/config";
-import type {WmRule} from "../config/config";
-import {sleep} from "../utils/helpers";
+import type {WmCondition, WmConfig, WmRule} from "../config/config";
+import {copy, sleep} from "../utils/helpers";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
 
@@ -187,11 +186,7 @@ export class WmSearch extends EventTarget {
       if (!this.checkLocation(portalNode)) {
         return
       }
-
-      let portalDetail = undefined;
-      for (const rule in this.config.rules) {
-        portalDetail = await this.checkPortalDetails(this.config.rules[rule], portalNode, portalDetail);
-      }
+      await this.checkPortalDetails(this.config.rules, portalNode);
     }
   }
 
@@ -249,6 +244,10 @@ export class WmSearch extends EventTarget {
 
   private removeMarker(portalNode: IITC.Portal, markerType: string) {
     const marker = WU.getMarker(markerType, portalNode.options.guid)
+    this.removeWasabeeMarker(marker);
+  }
+
+  private removeWasabeeMarker(marker: any) {
     if (marker) {
       WU.removeMarker(marker);
       this.status.removed++;
@@ -258,8 +257,7 @@ export class WmSearch extends EventTarget {
   private checkPortalDetailsConditions(conditions: WmCondition[], portalDetailData: IITC.PortalDataDetail, portalNodeOptions: IITC.PortalOptions) {
     return conditions
       .find(condition =>
-        this.checkTeam(condition, portalNodeOptions)
-        && this.checkLevel(condition, portalNodeOptions)
+        this.checkSimpleConditions(condition, portalNodeOptions)
         && this.checkMods(condition, portalDetailData)
       );
   }
@@ -280,26 +278,33 @@ export class WmSearch extends EventTarget {
     }, 250);
   }
 
-  private async checkPortalDetails(rule: WmRule, portalNode: IITC.Portal, portalDetail?: IITC.PortalDataDetail) {
+  private async checkPortalDetails(originalRules: WmRule[], portalNode: IITC.Portal) {
     const portalOptions = portalNode.options;
-    const conditions = rule.conditions.filter(condition => this.checkTeam(condition, portalOptions) && this.checkLevel(condition, portalOptions))
+    originalRules = copy(originalRules);
 
-    if (conditions.length > 0) {
-      if (conditions.find(c => !c.mods || c.mods.length === 0)) {
-        // no mods in condition, can mark immediately - nothing more to check
-        this.addMarker(portalNode, rule.markerType);
-      } else {
+    const rules = originalRules.filter(rule => {
+      rule.conditions = rule.conditions.filter(condition => this.checkSimpleConditions(condition, portalOptions));
+      return rule.conditions.length > 0;
+    });
+
+    originalRules.filter(r => !rules.includes(r)).forEach(rule => this.removeMarker(portalNode, rule.markerType));
+
+    if (rules.length > 0) {
+      const simpleRules = rules.filter((rule) => rule.conditions.find(c => !c.mods || c.mods.length === 0));
+      simpleRules.forEach((rule) => this.addMarker(portalNode, rule.markerType));
+
+      const complexRules = rules.filter(r => !simpleRules.includes(r));
+      if (complexRules.length > 0) {
         try {
-          if (!portalDetail) {
-            portalDetail = await this.getPortalDetail(portalOptions);
-          }
-
+          const portalDetail = await this.getPortalDetail(portalOptions);
           if (portalDetail) {
-            if (this.checkPortalDetailsConditions(conditions, portalDetail, portalOptions)) {
-              this.addMarker(portalNode, rule.markerType);
-            } else {
-              this.removeMarker(portalNode, rule.markerType);
-            }
+            complexRules.forEach(rule => {
+              if (this.checkPortalDetailsConditions(rule.conditions, portalDetail, portalOptions)) {
+                this.addMarker(portalNode, rule.markerType);
+              } else {
+                this.removeMarker(portalNode, rule.markerType);
+              }
+            });
           }
         } catch (e) {
           console.log("Error");
@@ -307,8 +312,16 @@ export class WmSearch extends EventTarget {
         }
       }
     } else {
-      this.removeMarker(portalNode, rule.markerType);
+      this.removeAllMakers(portalOptions);
     }
-    return portalDetail;
+  }
+
+  private removeAllMakers(portalOptions: IITC.PortalOptions) {
+    WU.getPortalMarkers(portalOptions.guid)?.forEach((marker: any) => this.removeWasabeeMarker(marker));
+  }
+
+  private checkSimpleConditions(condition: WmCondition, portalOptions: IITC.PortalOptions) {
+    return this.checkTeam(condition, portalOptions)
+      && this.checkLevel(condition, portalOptions);
   }
 }

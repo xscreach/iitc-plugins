@@ -26,11 +26,15 @@ export function removeMarker(marker: any) {
   }
 }
 
-export function getMarker(markerType: string, guid: string) {
+export function getPortalMarkers(guid: string) {
   if (plugin.wasabee) {
     const markers = plugin.wasabee._selectedOp.markers;
-    return markers.find((marker: { portalId: string; type: string; }) => marker.portalId === guid && marker.type === markerType);
+    return markers.find((marker: { portalId: string }) => marker.portalId === guid);
   }
+}
+
+export function getMarker(markerType: string, guid: string) {
+  return getPortalMarkers(guid)?.find((marker: { type: string; }) => marker.type === markerType);
 }
 
 export function getWasabeeStrings() {

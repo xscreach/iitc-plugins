@@ -95,7 +95,7 @@ export class WmConfigHolder {
       const wmRule = Object.assign(new WmRule(), {
         conditions: config.conditions,
         markerType: config.markerType,
-        name: 'Imported Rule'
+        name: 'Migrated Rule'
       });
 
       config.rules.push(wmRule);
