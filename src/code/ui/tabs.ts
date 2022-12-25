@@ -1,5 +1,3 @@
-import "./tabs.scss"
-
 export interface TabConfig {
   title: string,
   content: HTMLDivElement
@@ -12,15 +10,14 @@ export class Tabs {
   private selectedTab = 0;
 
   constructor(tabs: TabConfig[], parent?: HTMLElement) {
+
     this.container = L.DomUtil.create('div', 'ui-tabs tabs wm-tabs', parent)
-    this.tabs = tabs.map(t => new Tab(t.title, t.content));
+    this.tabs = tabs.map(t => new Tab(t));
 
     const nav = L.DomUtil.create("ul", "ui-tabs-nav nav", this.container);
 
     this.tabs.forEach((tab, i) => {
-      L.DomUtil
-        .create("li", "ui-tabs-tab", nav)
-        .appendChild(tab.header);
+      nav.appendChild(tab.header);
       L.DomEvent.on(tab.header, "click", () => {
         this.tabs[this.selectedTab].deactivate();
         this.tabs[i].activate();
@@ -40,18 +37,17 @@ export class Tabs {
 }
 
 class Tab {
-  public readonly header: HTMLAnchorElement;
-  public readonly content: HTMLDivElement;
+  public readonly header: HTMLElement;
+  public readonly content: HTMLElement;
 
-  constructor(title: string, content: HTMLDivElement) {
-    this.header = L.DomUtil.create("a");
-    this.header.innerText = title;
-    this.header.title = title;
-    this.header.classList.add("ui-tabs-anchor");
+  constructor(tabConfig: TabConfig) {
+    this.header = L.DomUtil.create("li", "ui-tabs-tab");
+    const headerLink = L.DomUtil.create('a', 'ui-tabs-anchor', this.header);
+    headerLink.innerText = tabConfig.title;
+    headerLink.title = tabConfig.title;
 
     this.content = L.DomUtil.create('div', "ui-tabs-panel");
-    this.content.append(content);
-
+    this.content.append(tabConfig.content);
     this.deactivate();
   }
 
