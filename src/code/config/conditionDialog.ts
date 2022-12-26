@@ -8,7 +8,7 @@ import {NumberInputField} from "../ui/forms/numberInputField";
 import {SelectField, SelectFieldOptions} from "../ui/forms/selectField";
 
 import "./conditionDialog.scss";
-import {WmComparatorTypes, WmCondition, WmModRarityText, WmModTypes, WmRule} from "./config";
+import {WmComparatorTypes, WmCondition, WmHistory, WmHistoryFields, WmModRarityText, WmModTypes, WmRule} from "./config";
 
 export class ConditionDialog extends Dialog {
   private readonly isNew: boolean;
@@ -35,6 +35,8 @@ export class ConditionDialog extends Dialog {
   }
 
   private createForm() {
+    const formModel = Object.assign({}, this.condition);
+
     const levelComparatorOptions = Object.keys(WmComparatorTypes).map((value) => new SelectFieldOptions(value, `${value} (${WmComparatorTypes[value]})`));
     const fields = [
       this.createFactionField(),
@@ -47,7 +49,7 @@ export class ConditionDialog extends Dialog {
         },
         {
           name: 'History',
-          fields: this.createHistoryFields(),
+          fields: this.createHistoryFields(formModel.history),
           modelName: 'history',
         },
         {
@@ -56,7 +58,7 @@ export class ConditionDialog extends Dialog {
         }
       ])
     ];
-    return new Form(Object.assign({}, this.condition), fields);
+    return new Form(formModel, fields);
   }
 
   private createModFields() {
@@ -120,18 +122,13 @@ export class ConditionDialog extends Dialog {
     });
   }
 
-  private createHistoryFields() {
-    const fields: { [key: string]: string } = {
-      visited: 'Visited',
-      captured: 'Captured',
-      scoutControlled: 'Scout Controlled'
-    }
-
-    return Object.keys(fields).map((field) => {
+  private createHistoryFields(formModel: WmHistory) {
+    return Object.keys(WmHistoryFields).map((field) => {
       const selectField = new SelectField(
         {
-          name: field, label: '',
-          options: [true, false].map(v => new SelectFieldOptions(String(v), ((!v) ? 'Not ' : '') + fields[field])),
+          name: field,
+          label: '',
+          options: [true, false].map(v => new SelectFieldOptions(String(v), ((!v) ? 'Not ' : '') + WmHistoryFields[field])),
           valueExtractor: model => {
             let value = model[field];
             if (typeof value == 'undefined') {
@@ -141,21 +138,24 @@ export class ConditionDialog extends Dialog {
           },
           onChange: (model, event) => {
             model[field] = event.target.value == "true";
-          }
+          },
+          disabled: typeof formModel[<keyof WmHistory>field] == 'undefined'
         }
       );
 
       return new BooleanCheckBoxField(
         {
           fieldName: field,
-          label: fields[field],
+          label: WmHistoryFields[field],
           extraFields: [selectField],
           valueExtractor: model => typeof model[field] !== 'undefined',
           onChange: (model, e) => {
             if (!e.target.checked) {
               delete model[field];
+              selectField.disable();
             } else {
               model[field] = selectField.value() == "true";
+              selectField.enable();
             }
           }
         }

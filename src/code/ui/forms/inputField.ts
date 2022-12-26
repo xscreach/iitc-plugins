@@ -7,7 +7,7 @@ export class InputField extends FieldBasics {
     super('input', name, label);
   }
 
-  protected createFieldHTMLElement() {
+  protected createFieldHTMLElement(): HTMLInputElement | HTMLSelectElement {
     const valueInput: HTMLInputElement = L.DomUtil.create('input');
     this.inputAttributes(valueInput);
     return valueInput;

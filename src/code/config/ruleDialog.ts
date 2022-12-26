@@ -7,7 +7,7 @@ import {Table} from "../ui/table";
 import {copy} from "../utils/helpers";
 import {getMarkerTypeName} from "../utils/wasabeeUtils";
 import {ConditionDialog} from "./conditionDialog";
-import {WmCondition, WmConfig, WmModRarityText, WmRule} from "./config";
+import {WmCondition, WmConfig, WmHistoryFields, WmModRarityText, WmRule} from "./config";
 import "./ruleDialog.scss";
 
 export class RuleDialog extends Dialog {
@@ -32,9 +32,10 @@ export class RuleDialog extends Dialog {
           valueRenderer: (element, condition) => {
             element.classList.add('wm-condition-condition')
             const conditionAnchor = L.DomUtil.create('a', undefined, element);
-            conditionAnchor.title = 'Edit';
             conditionAnchor.addEventListener('click', () => this.conditionDialog(condition));
-            conditionAnchor.innerText = this.getConditionString(condition);
+            const conditionText = this.getConditionString(condition);
+            conditionAnchor.title = conditionText;
+            conditionAnchor.innerText = conditionText;
           }
         },
       ],
@@ -47,7 +48,11 @@ export class RuleDialog extends Dialog {
     const factions = condition.factions.map(value => TEAM_NAMES[value]).join(', ');
     let conditionText = `(${factions}) ${String(condition.levelComparator)} ${String(condition.level)}`;
     if (condition.mods && condition.mods.length > 0) {
-      conditionText += ` + [${condition.mods.map(v => WmModRarityText[v.rarity] + " " + v.type).join(", ")}]`
+      conditionText += ` + [${condition.mods.map(v => WmModRarityText[v.rarity] + " " + v.type).join(', ')}]`
+    }
+
+    if (condition.history && Object.keys(condition.history).length > 0) {
+      conditionText += ` + [${Object.keys(condition.history).map(name => WmHistoryFields[name]).join(', ')}]`;
     }
     return conditionText;
   }

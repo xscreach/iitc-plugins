@@ -1,4 +1,13 @@
-.wm-dialog-wm-config-condition .form .labeled-array-factions {
-  display: flex;
-  flex-wrap: wrap;
+.wm-dialog-wm-config-condition {
+  .form .labeled-array-factions {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .form-history {
+    .boolean-checkbox {
+      display: grid;
+      grid-template-columns: 5% auto 0 auto;
+    }
+  }
 }

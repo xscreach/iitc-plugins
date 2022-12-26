@@ -1,5 +1,5 @@
 import type {IITC} from "../../types/iitc";
-import type {WmCondition, WmConfig, WmRule} from "../config/config";
+import type {WmCondition, WmConfig, WmHistory, WmRule} from "../config/config";
 import {sleep} from "../utils/helpers";
 import {interpolate} from "../utils/stringUtils";
 import * as WU from "../utils/wasabeeUtils";
@@ -330,6 +330,19 @@ export class WmSearch extends EventTarget {
 
   private checkSimpleConditions(condition: WmCondition, portalOptions: IITC.PortalOptions) {
     return this.checkTeam(condition, portalOptions)
-      && this.checkLevel(condition, portalOptions);
+      && this.checkLevel(condition, portalOptions)
+      && this.checkHistory(condition, portalOptions);
+  }
+
+  private checkHistory(condition: WmCondition, portalOptions: IITC.PortalOptions) {
+    if (condition.history) {
+      const portalHistory = portalOptions.data.history;
+      const historyConditionNames = Object.keys(condition.history);
+      if (!portalHistory) {
+        return !!historyConditionNames.find((name) => !condition.history[<keyof WmHistory>name]);
+      }
+      return historyConditionNames.find(name => condition.history[<keyof WmHistory>name] === portalHistory[<keyof IITC.PortalHistory>name]);
+    }
+    return true;
   }
 }

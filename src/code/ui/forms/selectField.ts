@@ -6,6 +6,7 @@ export interface SelectFieldDef {
   options: SelectFieldOptions[]
   valueExtractor?: (model: any) => string
   onChange?: (model: any, event: any) => void
+  disabled?: boolean
 }
 
 export class SelectFieldOptions {
@@ -14,14 +15,17 @@ export class SelectFieldOptions {
 }
 
 export class SelectField extends FieldBasics {
+
+  private selectBox?: HTMLSelectElement;
+
   constructor(private readonly definition: SelectFieldDef) {
-    super('select', definition.name, definition.label, definition.valueExtractor, definition.onChange);
+    super('select', definition.name, definition.label, definition.valueExtractor, definition.onChange, definition.disabled);
   }
 
-  protected createFieldHTMLElement() {
-    const selectBox = L.DomUtil.create('select');
-    this.definition.options.forEach(value => selectBox.add(this.createOptionElement(value)))
-    return selectBox;
+  protected createFieldHTMLElement(): HTMLInputElement | HTMLSelectElement {
+    this.selectBox = L.DomUtil.create('select');
+    this.definition.options.forEach(value => this.selectBox?.add(this.createOptionElement(value)))
+    return this.selectBox;
   }
 
   protected createOptionElement(option: SelectFieldOptions) {

@@ -34,6 +34,12 @@ export const WmModTypes: { [key: string]: string[] } = {
   'ITO+': [WmModRarity.RARE],
 }
 
+export const WmHistoryFields: { [key: string]: string } = {
+  visited: 'Visited',
+  captured: 'Captured',
+  scoutControlled: 'Scout Controlled'
+}
+
 
 
 export interface WmModConditions {

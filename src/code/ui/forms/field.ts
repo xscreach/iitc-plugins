@@ -16,12 +16,14 @@ export abstract class FieldBasics implements Field {
   private readonly onChange: (mode: any, event: any) => void;
 
   private valueInput: HTMLInputElement | HTMLSelectElement | undefined;
+  private disabled: boolean;
 
   protected constructor(protected readonly type: keyof FieldTypeMap,
                         protected readonly name: string,
                         protected readonly label: string,
                         valueExtractor?: (model: any) => string,
-                        onChange?: (mode: any, event: any) => void) {
+                        onChange?: (mode: any, event: any) => void,
+                        disabled?: boolean) {
     if (!valueExtractor) {
       valueExtractor = model => model[this.name];
     }
@@ -33,6 +35,11 @@ export abstract class FieldBasics implements Field {
       };
     }
     this.onChange = onChange;
+    if (typeof disabled == 'undefined') {
+      this.disabled = false;
+    } else {
+      this.disabled = disabled;
+    }
   }
 
   id(): string {
@@ -43,6 +50,7 @@ export abstract class FieldBasics implements Field {
     this.valueInput = this.createFieldHTMLElement();
     this.valueInput.id = this.id();
     this.valueInput.value = this.valueExtractor(model);
+    this.valueInput.disabled = this.disabled;
     this.valueInput.addEventListener("change", (ev) => {
       this.onChange(model, ev);
     });
@@ -63,5 +71,19 @@ export abstract class FieldBasics implements Field {
 
   value(): string | undefined {
     return this.valueInput?.value;
+  }
+
+  disable() {
+    if (this.valueInput && !this.disabled) {
+      this.valueInput.disabled = true;
+      this.disabled = true;
+    }
+  }
+
+  enable() {
+    if (this.valueInput && this.disabled) {
+      this.valueInput.disabled = false;
+      this.disabled = false;
+    }
   }
 }
