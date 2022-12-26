@@ -11,7 +11,7 @@ export class ArrayItemField<T> implements Field {
   }
 
   html(model: T[]): HTMLElement[] {
-    this.selected = !!model.find(value => fdp(value, this.item))
+    this.selected = typeof model.find(value => fdp(value, this.item)) != 'undefined';
 
     const itemElement = L.DomUtil.create('div', 'array-item')
     if (this.selected) {
