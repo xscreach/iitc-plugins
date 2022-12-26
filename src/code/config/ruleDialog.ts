@@ -1,4 +1,3 @@
-import {WasabeeMarker} from "../globals";
 import {Dialog} from "../ui/dialog";
 import {Form} from "../ui/forms/forms";
 import {InputField} from "../ui/forms/inputField";
@@ -7,7 +6,7 @@ import {Table} from "../ui/table";
 import {copy} from "../utils/helpers";
 import {getMarkerTypeName} from "../utils/wasabeeUtils";
 import {ConditionDialog} from "./conditionDialog";
-import {WmCondition, WmConfig, WmHistoryFields, WmModRarityText, WmRule} from "./config";
+import {WasabeeMarker, WmCondition, WmConfig, WmHistoryFields, WmModRarityText, WmRule} from "./config";
 import "./ruleDialog.scss";
 
 export class RuleDialog extends Dialog {

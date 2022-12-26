@@ -6,7 +6,7 @@ import {WmSearch} from "./progress/search";
 import "./wasabeeMarkers-mobile.scss"
 import {ActionButton} from "./wmActionButton";
 
-window.plugin.wasabeeMarkers.init = function () {
+plugin[WM.PLUGIN_CODE].init = function () {
 
   if (isSmartphone()) {
     $('body').addClass("wm-mobile");
@@ -14,7 +14,7 @@ window.plugin.wasabeeMarkers.init = function () {
 
   const config = WmConfigHolder.config.copy();
   const search = new WmSearch(config);
-  window.plugin.wasabeeMarkers.search = search;
+  plugin[WM.PLUGIN_CODE].search = search;
 
   $('<a>')
     .html(WM.PLUGIN_NAME)
@@ -22,7 +22,7 @@ window.plugin.wasabeeMarkers.init = function () {
     .on("click", () => new ConfigWindow(search).showDialog())
     .appendTo('#toolbox');
 
-  window.map.addControl(new ActionButton(search));
+  map.addControl(new ActionButton(search));
 
   createProgressWindow(search);
 }

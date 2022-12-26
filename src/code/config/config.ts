@@ -1,4 +1,3 @@
-import {WasabeeMarker} from "../globals";
 import {copy} from "../utils/helpers";
 
 export const WmComparatorTypes: { [key: string]: string } = {
@@ -59,6 +58,22 @@ export interface WmCondition {
   mods: WmModConditions[];
   history: WmHistory;
   factions: number[];
+}
+
+export enum WasabeeMarker {
+  "CapturePortalMarker",
+  "LetDecayPortalAlert",
+  "ExcludeMarker",
+  "DestroyPortalAlert",
+  "FarmPortalMarker",
+  "GotoPortalMarker",
+  "GetKeyPortalMarker",
+  "CreateLinkAlert",
+  "MeetAgentPortalMarker",
+  "OtherPortalAlert",
+  "RechargePortalAlert",
+  "UpgradePortalAlert",
+  "UseVirusPortalAlert"
 }
 
 export class WmRule {

@@ -139,7 +139,7 @@ export class ConditionDialog extends Dialog {
           onChange: (model, event) => {
             model[field] = event.target.value == "true";
           },
-          disabled: typeof formModel[<keyof WmHistory>field] == 'undefined'
+          disabled: !formModel || typeof formModel[<keyof WmHistory>field] == 'undefined'
         }
       );
 
