@@ -91,7 +91,7 @@ export class ProgressWindow extends Dialog {
     this.createDialog({
       title: 'Search progress',
       html: html,
-      width: "auto",
+      width: "350",
       dialogClass: 'wm-config-progress',
       buttons: [
         this.lastStatus ? this.stopButton : this.startButton,

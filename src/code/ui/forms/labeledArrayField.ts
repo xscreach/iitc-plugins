@@ -11,10 +11,10 @@ export class LabeledArrayField<T> implements Field {
   }
 
   html(model: any): HTMLElement[] {
-    const selectionContainer = L.DomUtil.create('div', 'labeled-array');
+    const selectionContainer = L.DomUtil.create('div', 'labeled-array labeled-array-' + this.propertyName);
 
     this.values.forEach((value, index) => {
-      const itemField = new ArrayItemField(index, value);
+      const itemField = new ArrayItemField(value);
       if (this.itemRenderer) {
         itemField.itemRenderer = (container) => {
           if (this.itemRenderer) {

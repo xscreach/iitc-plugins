@@ -1,8 +1,6 @@
 .wm-dialog-wm-config {
-  .form {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
+  .form > * {
+    width: 100%;
   }
 
   & > .ui-dialog-buttonpane > .ui-dialog-buttonset > button:first-child {

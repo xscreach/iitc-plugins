@@ -6,8 +6,7 @@ export class ArrayItemField<T> implements Field {
 
   private selected = false;
 
-  constructor(public index: number,
-              public item: T,
+  constructor(public item: T,
               public itemRenderer?: (container: HTMLElement) => void) {
   }
 

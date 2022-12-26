@@ -28,6 +28,10 @@ export class Dialog extends L.Handler {
         this.dialogResolver = resolve;
         options.dialogClass = `wm-dialog wm-dialog-${options.dialogClass}`;
 
+        options.closeCallback = () => {
+          this.closeDialog();
+        };
+
         L.setOptions(this, options);
 
         this._dialog = window.dialog(this.options);
@@ -62,8 +66,12 @@ export class Dialog extends L.Handler {
       this._dialog.dialog("close");
       delete this._dialog;
       this.disable();
+    }
+    if (this.dialogResolver) {
       this.dialogResolver();
       delete this.dialogResolver;
+    }
+    if (this.dialogPromise) {
       delete this.dialogPromise;
     }
   }

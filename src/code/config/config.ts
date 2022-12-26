@@ -41,10 +41,17 @@ export interface WmModConditions {
   rarity: keyof typeof WmModRarity
 }
 
+export interface WmHistory {
+  visited?: boolean,
+  captured?: boolean,
+  scoutControlled?: boolean
+}
+
 export interface WmCondition {
   level: number;
   levelComparator: keyof typeof WmComparatorTypes;
   mods: WmModConditions[];
+  history: WmHistory;
   factions: number[];
 }
 

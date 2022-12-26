@@ -1,3 +1,5 @@
+import "./tabs.scss";
+
 export interface TabConfig {
   title: string,
   content: HTMLDivElement
@@ -5,7 +7,7 @@ export interface TabConfig {
 
 export class Tabs {
 
-  private readonly container: HTMLDivElement ;
+  private readonly container: HTMLElement ;
   private tabs: Tab[];
   private selectedTab = 0;
 

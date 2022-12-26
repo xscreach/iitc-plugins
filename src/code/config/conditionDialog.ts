@@ -1,9 +1,13 @@
 import {Dialog} from "../ui/dialog";
+import {BooleanCheckBoxField} from "../ui/forms/booleanCheckBoxField";
 import type {Field} from "../ui/forms/field";
 import {Form} from "../ui/forms/forms";
+import {FormTabsElement} from "../ui/forms/formTabsElement";
 import {LabeledArrayField} from "../ui/forms/labeledArrayField";
 import {NumberInputField} from "../ui/forms/numberInputField";
-import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
+import {SelectField, SelectFieldOptions} from "../ui/forms/selectField";
+
+import "./conditionDialog.scss";
 import {WmComparatorTypes, WmCondition, WmModRarityText, WmModTypes, WmRule} from "./config";
 
 export class ConditionDialog extends Dialog {
@@ -19,7 +23,8 @@ export class ConditionDialog extends Dialog {
         level: 7,
         levelComparator: ">=",
         mods: [],
-        factions: []
+        factions: [],
+        history: {}
       };
     } else {
       this.isNew = false;
@@ -34,8 +39,22 @@ export class ConditionDialog extends Dialog {
     const fields = [
       this.createFactionField(),
       new NumberInputField('level', "Level", 1, 8),
-      new SelectField('levelComparator', "Level comparator", levelComparatorOptions),
-      ...this.createModFields()
+      new SelectField({name: 'levelComparator', label: "Level comparator", options: levelComparatorOptions}),
+      new FormTabsElement([
+        {
+          name: 'Mods',
+          fields: this.createModFields()
+        },
+        {
+          name: 'History',
+          fields: this.createHistoryFields(),
+          modelName: 'history',
+        },
+        {
+          name: 'For Upgrade',
+          fields: this.createSlotsFields()
+        }
+      ])
     ];
     return new Form(Object.assign({}, this.condition), fields);
   }
@@ -86,7 +105,7 @@ export class ConditionDialog extends Dialog {
     this.createDialog({
       title: `${title} Condition`,
       html: html,
-      width: "auto",
+      width: "350",
       dialogClass: 'wm-config-condition',
       buttons: buttons,
       id: id
@@ -99,5 +118,52 @@ export class ConditionDialog extends Dialog {
       const element = L.DomUtil.create('div', TEAM_TO_CSS[item], container);
       element.innerText = TEAM_NAMES[item];
     });
+  }
+
+  private createHistoryFields() {
+    const fields: { [key: string]: string } = {
+      visited: 'Visited',
+      captured: 'Captured',
+      scoutControlled: 'Scout Controlled'
+    }
+
+    return Object.keys(fields).map((field) => {
+      const selectField = new SelectField(
+        {
+          name: field, label: '',
+          options: [true, false].map(v => new SelectFieldOptions(String(v), ((!v) ? 'Not ' : '') + fields[field])),
+          valueExtractor: model => {
+            let value = model[field];
+            if (typeof value == 'undefined') {
+              value = String(true);
+            }
+            return value;
+          },
+          onChange: (model, event) => {
+            model[field] = event.target.value == "true";
+          }
+        }
+      );
+
+      return new BooleanCheckBoxField(
+        {
+          fieldName: field,
+          label: fields[field],
+          extraFields: [selectField],
+          valueExtractor: model => typeof model[field] !== 'undefined',
+          onChange: (model, e) => {
+            if (!e.target.checked) {
+              delete model[field];
+            } else {
+              model[field] = selectField.value() == "true";
+            }
+          }
+        }
+      );
+    });
+  }
+
+  private createSlotsFields() {
+    return [];
   }
 }

@@ -2,7 +2,7 @@ import {WasabeeMarker} from "../globals";
 import {Dialog} from "../ui/dialog";
 import {Form} from "../ui/forms/forms";
 import {InputField} from "../ui/forms/inputField";
-import {SelectField, SelectFieldOptions} from "../ui/forms/selectFieldOptions";
+import {SelectField, SelectFieldOptions} from "../ui/forms/selectField";
 import {Table} from "../ui/table";
 import {copy} from "../utils/helpers";
 import {getMarkerTypeName} from "../utils/wasabeeUtils";
@@ -108,7 +108,7 @@ export class RuleDialog extends Dialog {
       .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], getMarkerTypeName(WasabeeMarker[index])));
     const formConfig = [
       new InputField("name", "Rule name"),
-      new SelectField("markerType", "Marker type", options),
+      new SelectField({name: "markerType", label: "Marker type", options: options}),
     ];
     return new Form(this.rule, formConfig);
   }
