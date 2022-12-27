@@ -2,7 +2,7 @@
 // @id            WasabeeAutoMarkers
 // @name          Wasabee Auto Markers
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion
-// @version       0.0.4.20221226232117-2fdbad1
+// @version       0.0.4.20221227025019-ddcb8e2
 // @updateURL     https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/prod/wasabeeMarkers.meta.js
 // @downloadURL   https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/prod/wasabeeMarkers.user.js
 // @description   Marks specific portals with Wasabee markers based on configuration
