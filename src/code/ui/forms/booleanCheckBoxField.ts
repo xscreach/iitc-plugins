@@ -1,8 +1,8 @@
 import "./booleanCheckboxField.scss"
 import type {Field} from "./field";
 
-export interface FieldDefinition {
-  fieldName: string,
+export interface BooleanCheckBoxFieldDefinition {
+  name: string,
   label: string,
   valueExtractor?: (model: any) => boolean,
   onChange?: (model: any, e: any) => void,
@@ -11,11 +11,11 @@ export interface FieldDefinition {
 
 export class BooleanCheckBoxField implements Field {
 
-  constructor(private readonly fieldDef: FieldDefinition) {
+  constructor(private readonly fieldDef: BooleanCheckBoxFieldDefinition) {
     const defaults = {
-      valueExtractor: (m: any) => !!m[this.fieldDef.fieldName],
+      valueExtractor: (m: any) => !!m[this.fieldDef.name],
       onChange: (model: any, e: any) => {
-        model[this.fieldDef.fieldName] = !!e.target.checked;
+        model[this.fieldDef.name] = !!e.target.checked;
       }
     };
     this.fieldDef = Object.assign(defaults, fieldDef)
@@ -28,14 +28,14 @@ export class BooleanCheckBoxField implements Field {
     if (this.fieldDef.valueExtractor) {
       fieldElement.checked = this.fieldDef.valueExtractor(model);
     }
-    fieldElement.id = 'checkbox-' + this.fieldDef.fieldName;
+    fieldElement.id = 'checkbox-' + this.fieldDef.name;
     fieldElement.addEventListener('change', (e: any) => {
       if (this.fieldDef.onChange) {
         this.fieldDef.onChange(model, e);
       }
     });
     const labelElement = L.DomUtil.create('label', undefined, container);
-    labelElement.htmlFor = 'checkbox-' + this.fieldDef.fieldName;
+    labelElement.htmlFor = 'checkbox-' + this.fieldDef.name;
     labelElement.innerText = this.fieldDef.label;
 
     if (this.fieldDef.extraFields) {

@@ -254,16 +254,19 @@ export class WmSearch extends EventTarget {
     }
   }
 
-  private checkPortalDetailsConditions(conditions: WmCondition[], portalDetailData: IITC.PortalDataDetail, portalNodeOptions: IITC.PortalOptions) {
-    return conditions
+  private checkPortalDetailsConditions(conditions: WmCondition[], portalDetailData: IITC.PortalDataDetail, portalNodeOptions: IITC.PortalOptions): boolean {
+    return !!conditions
       .find(condition =>
-        this.checkSimpleConditions(condition, portalNodeOptions)
-        && this.checkMods(condition, portalDetailData)
+          this.checkSimpleConditions(condition, portalNodeOptions)
+          && (
+            this.checkMods(condition, portalDetailData)
+            || this.checkSlots(condition, portalDetailData)
+          )
       );
   }
 
-  private checkMods(condition: WmCondition, portalDetailData: IITC.PortalDataDetail) {
-    return portalDetailData.mods
+  private checkMods(condition: WmCondition, portalDetailData: IITC.PortalDataDetail): boolean {
+    return !!portalDetailData.mods
       .find(portalMod =>
         condition.mods
           .find(conditionMod => portalMod?.rarity == conditionMod.rarity && portalMod.name == conditionMod.type));
@@ -276,6 +279,18 @@ export class WmSearch extends EventTarget {
         this.progressMarkingLoop();
       }
     }, 250);
+  }
+
+  private isCompleted(condition: WmCondition, portalOptions: IITC.PortalOptions): boolean {
+    return (
+        !condition.mods
+        || condition.mods.length === 0
+      )
+      && (
+        teamStringToId(PLAYER.team) !== portalOptions.team
+        || !condition.slots
+        || Object.keys(condition.slots).length === 0
+      );
   }
 
   private async checkPortalDetails(originalRules: WmRule[], portalNode: IITC.Portal) {
@@ -295,7 +310,7 @@ export class WmSearch extends EventTarget {
     if (rules.length > 0) {
       const complexRules: WmRule[] = []
       rules.forEach(rule => {
-        if (rule.conditions.find(c => !c.mods || c.mods.length === 0)) {
+        if (rule.conditions.find(c => this.isCompleted(c, portalOptions))) {
           this.addMarker(portalNode, rule.markerType);
         } else {
           complexRules.push(rule);
@@ -339,10 +354,31 @@ export class WmSearch extends EventTarget {
       const portalHistory = portalOptions.data.history;
       const historyConditionNames = Object.keys(condition.history);
       if (!portalHistory) {
-        return !!historyConditionNames.find((name) => !condition.history[<keyof WmHistory>name]);
+        return !!historyConditionNames.find((name) => !condition.history?.[<keyof WmHistory>name]);
       }
-      return historyConditionNames.find(name => condition.history[<keyof WmHistory>name] === portalHistory[<keyof IITC.PortalHistory>name]);
+      return historyConditionNames.find(name => condition.history?.[<keyof WmHistory>name] === portalHistory[<keyof IITC.PortalHistory>name]);
     }
     return true;
+  }
+
+  private checkSlots(condition: WmCondition, portalDetailData: IITC.PortalDataDetail): boolean {
+    return this.checkModSlots(portalDetailData, condition.slots?.mods) || this.checkResoSlots(portalDetailData, condition.slots?.r8);
+  }
+
+  private checkModSlots(portalDetailData: IITC.PortalDataDetail, mods?: number): boolean {
+    return !!mods && !!portalDetailData.mods && this.theModSlotCheck(mods, portalDetailData.mods);
+  }
+
+  private checkResoSlots(portalDetailData: IITC.PortalDataDetail, r8?: number): boolean {
+    return !!r8 && !!portalDetailData.resonators && this.theResoSlotCheck(portalDetailData.resonators, r8);
+  }
+
+  private theModSlotCheck(conditionMods: number, portalMods: [(IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null)]): boolean {
+    const deployed = portalMods.filter(m => !!m);
+    return deployed.length < 4 && deployed.filter(m => m?.owner === PLAYER.nickname).length < conditionMods;
+  }
+
+  private theResoSlotCheck(resonators: IITC.Resonator[], r8: number) {
+    return resonators.filter(m => m?.owner === PLAYER.nickname && m.level === 8).length < r8;
   }
 }

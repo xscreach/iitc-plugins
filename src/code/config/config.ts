@@ -41,22 +41,37 @@ export const WmHistoryFields: { [key: string]: string } = {
 
 
 
-export interface WmModConditions {
+export type WmModConditions ={
   type: keyof typeof WmModTypes
   rarity: keyof typeof WmModRarity
 }
 
-export interface WmHistory {
-  visited?: boolean,
-  captured?: boolean,
+export type WmHistory = {
+  visited?: boolean
+  captured?: boolean
   scoutControlled?: boolean
 }
 
-export interface WmCondition {
+export const wmSlotDefaults = {
+  mods: 2,
+  r8: 1
+}
+
+export const wmSlotLabels = {
+  mods: 'Mod slots available',
+  r8: 'Possible deploy of L8 resonator(s)'
+}
+
+export type WmSlotConfig = {
+  [key in keyof typeof wmSlotDefaults]?: number;
+};
+
+export type WmCondition = {
   level: number;
   levelComparator: keyof typeof WmComparatorTypes;
   mods: WmModConditions[];
-  history: WmHistory;
+  history?: WmHistory;
+  slots?: WmSlotConfig;
   factions: number[];
 }
 

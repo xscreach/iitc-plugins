@@ -111,7 +111,7 @@ export class RuleDialog extends Dialog {
       .fill(0)
       .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], getMarkerTypeName(WasabeeMarker[index])));
     const formConfig = [
-      new InputField("name", "Rule name"),
+      new InputField({name: "name", label: "Rule name"}),
       new SelectField({name: "markerType", label: "Marker type", options: options}),
     ];
     return new Form(this.rule, formConfig);

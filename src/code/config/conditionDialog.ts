@@ -8,7 +8,7 @@ import {NumberInputField} from "../ui/forms/numberInputField";
 import {SelectField, SelectFieldOptions} from "../ui/forms/selectField";
 
 import "./conditionDialog.scss";
-import {WmComparatorTypes, WmCondition, WmHistory, WmHistoryFields, WmModRarityText, WmModTypes, WmRule} from "./config";
+import {WmComparatorTypes, WmCondition, WmHistory, WmHistoryFields, WmModRarityText, WmModTypes, WmRule, WmSlotConfig, wmSlotDefaults, wmSlotLabels} from "./config";
 
 export class ConditionDialog extends Dialog {
   private readonly isNew: boolean;
@@ -40,7 +40,7 @@ export class ConditionDialog extends Dialog {
     const levelComparatorOptions = Object.keys(WmComparatorTypes).map((value) => new SelectFieldOptions(value, `${value} (${WmComparatorTypes[value]})`));
     const fields = [
       this.createFactionField(),
-      new NumberInputField('level', "Level", 1, 8),
+      new NumberInputField({name: 'level', label: "Level", min: 1, max: 8}),
       new SelectField({name: 'levelComparator', label: "Level comparator", options: levelComparatorOptions}),
       new FormTabsElement([
         {
@@ -53,8 +53,9 @@ export class ConditionDialog extends Dialog {
           modelName: 'history',
         },
         {
-          name: 'For Upgrade',
-          fields: this.createSlotsFields()
+          name: 'For Deploy',
+          fields: this.createSlotsFields(formModel.slots),
+          modelName: 'slots'
         }
       ])
     ];
@@ -122,7 +123,7 @@ export class ConditionDialog extends Dialog {
     });
   }
 
-  private createHistoryFields(formModel: WmHistory) {
+  private createHistoryFields(formModel?: WmHistory) {
     return Object.keys(WmHistoryFields).map((field) => {
       const selectField = new SelectField(
         {
@@ -145,7 +146,7 @@ export class ConditionDialog extends Dialog {
 
       return new BooleanCheckBoxField(
         {
-          fieldName: field,
+          name: field,
           label: WmHistoryFields[field],
           extraFields: [selectField],
           valueExtractor: model => typeof model[field] !== 'undefined',
@@ -163,7 +164,39 @@ export class ConditionDialog extends Dialog {
     });
   }
 
-  private createSlotsFields() {
-    return [];
+  private createSlotsFields(slotConfig?: WmSlotConfig) {
+    return Object.keys(wmSlotDefaults).map((field) => {
+      const fieldName = <keyof WmSlotConfig>field;
+      const inputField = new NumberInputField({
+          name: field,
+          label: 'Max',
+          min: 1,
+          max: (field === 'mods' ? 4 : 8),
+          valueExtractor: model => {
+            let value = model[field];
+            if (typeof value === 'undefined') {
+              value = wmSlotDefaults[<keyof WmSlotConfig>field];
+            }
+            return value;
+          },
+          disabled: !slotConfig || typeof slotConfig[fieldName] == 'undefined'
+        }
+      );
+      return new BooleanCheckBoxField({
+        name: field,
+        label: wmSlotLabels[fieldName],
+        extraFields: [inputField],
+        valueExtractor: model => typeof model[field] !== 'undefined',
+        onChange: (model, e) => {
+          if (!e.target.checked) {
+            delete model[field];
+            inputField.disable();
+          } else {
+            model[field] = Number(inputField.value());
+            inputField.enable();
+          }
+        }
+      })
+    });
   }
 }

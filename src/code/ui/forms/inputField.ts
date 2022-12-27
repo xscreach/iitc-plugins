@@ -1,10 +1,9 @@
-import {FieldBasics} from "./field";
+import {FieldBasics, FieldConfig} from "./field";
 
 export class InputField extends FieldBasics {
 
-  constructor(readonly name: string,
-              readonly label: string) {
-    super('input', name, label);
+  constructor(fieldConfig: FieldConfig) {
+    super('input', fieldConfig);
   }
 
   protected createFieldHTMLElement(): HTMLInputElement | HTMLSelectElement {

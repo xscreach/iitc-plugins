@@ -4,10 +4,24 @@
     flex-wrap: wrap;
   }
 
-  .form-history {
+  .form-history, .form-slots {
     .boolean-checkbox {
       display: grid;
-      grid-template-columns: 5% auto 0 auto;
+    }
+  }
+
+  .form-history .boolean-checkbox {
+    grid-template-columns: 2.5ch auto 0 auto;
+    label {
+      padding-top: 2px;
+    }
+  }
+
+  .form-slots .boolean-checkbox {
+    grid-template-columns: 2.5ch auto 4ch 5ch;
+
+    label {
+      padding-top: 4px;
     }
   }
 }

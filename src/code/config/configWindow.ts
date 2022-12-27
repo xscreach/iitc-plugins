@@ -112,12 +112,12 @@ export class ConfigWindow extends Dialog {
 
   private createForm() {
     const formConfig = [
-      new BooleanCheckBoxField({ fieldName: 'keepScanning', label: 'Scan when map with portals loaded'}),
-      new BooleanCheckBoxField({ fieldName: 'autoUpload', label: 'Upload operation when done'}),
-      new BooleanCheckBoxField({ fieldName: 'showProgress', label: 'Show progress'}),
-      new BooleanCheckBoxField({ fieldName: 'showResults', label: 'Show results'}),
-      new NumberInputField("portalDetailThreads", "Max simultaneous portal detail requests", 1),
-      new NumberInputField("portalDetailRequestDelay", "Delay between portal detail requests (ms)", 0)
+      new BooleanCheckBoxField({name: 'keepScanning', label: 'Scan when map with portals loaded'}),
+      new BooleanCheckBoxField({name: 'autoUpload', label: 'Upload operation when done'}),
+      new BooleanCheckBoxField({name: 'showProgress', label: 'Show progress'}),
+      new BooleanCheckBoxField({name: 'showResults', label: 'Show results'}),
+      new NumberInputField({name: "portalDetailThreads", label: "Max simultaneous portal detail requests", min: 1}),
+      new NumberInputField({name: "portalDetailRequestDelay", label: "Delay between portal detail requests (ms)", min: 0})
     ];
     return new Form(this.search.config, formConfig);
   }

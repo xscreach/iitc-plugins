@@ -1,20 +1,27 @@
+import type {FieldConfig} from "./field";
 import {InputField} from "./inputField";
 
+export interface NumberInputFieldConfig extends FieldConfig {
+  min?: number
+  max?: number
+}
+
 export class NumberInputField extends InputField {
-  constructor(readonly name: string,
-              readonly label: string,
-              readonly min?: number,
-              readonly max?: number) {
-    super(name, label);
+  constructor(private config: NumberInputFieldConfig) {
+    super(Object.assign({
+      onChange: (model: any, event: JQuery.ChangeEvent) => {
+        model[config.name] = Number(event.target?.value)
+      },
+    }, config));
   }
 
   protected inputAttributes(valueInput: HTMLInputElement) {
     valueInput.type = "number";
-    if (this.min || this.min == 0) {
-      valueInput.min = String(this.min);
+    if (typeof this.config.min !== 'undefined') {
+      valueInput.min = String(this.config.min);
     }
-    if (this.max || this.max == 0) {
-      valueInput.max = String(this.max);
+    if (typeof this.config.max !== 'undefined') {
+      valueInput.max = String(this.config.max);
     }
   }
 }

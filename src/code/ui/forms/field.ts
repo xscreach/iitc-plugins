@@ -11,52 +11,50 @@ export interface FieldTypeMap {
   'select': SelectField
 }
 
-export abstract class FieldBasics implements Field {
-  private readonly valueExtractor: (model: any) => string;
-  private readonly onChange: (mode: any, event: any) => void;
+export type FieldConfig = {
+  name: string,
+  label: string,
+  valueExtractor?: (model: any) => string,
+  onChange?: (model: any, event: any) => void,
+  disabled?: boolean
+}
 
+export abstract class FieldBasics implements Field {
   private valueInput: HTMLInputElement | HTMLSelectElement | undefined;
-  private disabled: boolean;
 
   protected constructor(protected readonly type: keyof FieldTypeMap,
-                        protected readonly name: string,
-                        protected readonly label: string,
-                        valueExtractor?: (model: any) => string,
-                        onChange?: (mode: any, event: any) => void,
-                        disabled?: boolean) {
-    if (!valueExtractor) {
-      valueExtractor = model => model[this.name];
-    }
-    this.valueExtractor = valueExtractor;
+                        protected readonly fieldConfig: FieldConfig) {
 
-    if (!onChange) {
-      onChange = (model) => {
-        model[this.name] = this.valueInput?.value;
-      };
-    }
-    this.onChange = onChange;
-    if (typeof disabled == 'undefined') {
-      this.disabled = false;
-    } else {
-      this.disabled = disabled;
-    }
+    this.fieldConfig = Object.assign({
+      valueExtractor: (model: any) => model[fieldConfig.name],
+      onChange: (model: any) => {
+        model[this.fieldConfig.name] = this.valueInput?.value;
+      },
+      disabled: false
+    }, fieldConfig)
   }
 
   id(): string {
-    return `field-${this.type}-${this.name}`;
+    return `field-${this.type}-${this.fieldConfig.name}`;
   }
 
   html(model: any): HTMLElement[] {
     this.valueInput = this.createFieldHTMLElement();
     this.valueInput.id = this.id();
-    this.valueInput.value = this.valueExtractor(model);
-    this.valueInput.disabled = this.disabled;
+    if (this.fieldConfig.valueExtractor) {
+      this.valueInput.value = this.fieldConfig.valueExtractor(model);
+    }
+    if (typeof this.fieldConfig.disabled !== 'undefined') {
+      this.valueInput.disabled = this.fieldConfig.disabled;
+    }
     this.valueInput.addEventListener("change", (ev) => {
-      this.onChange(model, ev);
+      if (this.fieldConfig.onChange) {
+        this.fieldConfig.onChange(model, ev);
+      }
     });
 
     return [
-      ...new LabelField(this.id(), this.label).html(),
+      ...new LabelField(this.id(), this.fieldConfig.label).html(),
       this.valueInput
     ];
   }
@@ -64,8 +62,8 @@ export abstract class FieldBasics implements Field {
   protected abstract createFieldHTMLElement(): HTMLInputElement | HTMLSelectElement;
 
   update(model: any) {
-    if (this.valueInput) {
-      this.valueInput.value = this.valueExtractor(model);
+    if (this.valueInput && this.fieldConfig.valueExtractor) {
+      this.valueInput.value = this.fieldConfig.valueExtractor(model);
     }
   }
 
@@ -74,16 +72,16 @@ export abstract class FieldBasics implements Field {
   }
 
   disable() {
-    if (this.valueInput && !this.disabled) {
+    if (this.valueInput && !this.fieldConfig.disabled) {
       this.valueInput.disabled = true;
-      this.disabled = true;
+      this.fieldConfig.disabled = true;
     }
   }
 
   enable() {
-    if (this.valueInput && this.disabled) {
+    if (this.valueInput && this.fieldConfig.disabled) {
       this.valueInput.disabled = false;
-      this.disabled = false;
+      this.fieldConfig.disabled = false;
     }
   }
 }
