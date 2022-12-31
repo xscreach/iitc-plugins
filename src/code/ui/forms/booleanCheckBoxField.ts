@@ -39,7 +39,11 @@ export class BooleanCheckBoxField implements Field {
     labelElement.innerText = this.fieldDef.label;
 
     if (this.fieldDef.extraFields) {
-      container.append(...this.fieldDef.extraFields.flatMap(f => f.html(model)));
+      container.append(...this.fieldDef.extraFields.map(f => {
+        const extraFields = L.DomUtil.create('div', 'extra-fields');
+        extraFields.append(...f.html(model));
+        return extraFields;
+      }));
     }
     return [container];
   }

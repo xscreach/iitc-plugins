@@ -5,7 +5,7 @@
   }
 
   .form-history, .form-slots {
-    .boolean-checkbox > *:last-child {
+    .boolean-checkbox .extra-fields {
       float: right;
     }
   }
@@ -14,8 +14,11 @@
     label {
       padding-top: 2px;
     }
-    & > *:last-child {
+    .extra-fields {
       width: 50%;
+      select {
+        width: 100%;
+      }
     }
   }
 
@@ -24,8 +27,11 @@
       padding-top: 4px;
     }
 
-    & > *:last-child {
-      width: 5ch;
+    .extra-fields {
+      input {
+        width: 5ch;
+        margin-left: 5px;
+      }
     }
   }
 }
