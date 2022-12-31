@@ -11,6 +11,7 @@ export class ProgressWindow extends Dialog {
     'done': 'Done:',
     'ok': 'OK:',
     'detailsRequested': 'Portal Details Requested:',
+    'waitingRequests': 'Requests waiting:',
     'runningRequests': 'Requests running:',
     'detailsCached': 'Portal Details from cache:',
     'detailsLoaded': 'Loaded Portal Details:',

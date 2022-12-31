@@ -9,8 +9,9 @@ export class SearchStatus {
   readonly startTime: number;
 
   detailsRequested = 0;
-  detailsLoaded = 0;
   detailsCached = 0;
+  detailsLoading = 0;
+  detailsLoaded = 0;
   errors = 0;
 
   added = 0;
@@ -34,7 +35,11 @@ export class SearchStatus {
   }
 
   get runningRequests(): number {
-    return this.detailsRequested - this.detailsCached - this.detailsLoaded - this.errors;
+    return this.detailsLoading - this.detailsCached - this.detailsLoaded - this.errors;
+  }
+
+  get waitingRequests(): number {
+    return this.detailsRequested - this.detailsLoading;
   }
 
   get duration(): number {
@@ -209,7 +214,10 @@ export class WmSearch extends EventTarget {
         }
         this.lastRequest = new Date().getTime() + timeout;
         sleep(timeout)
-          .then(() => portalDetail.request(portalGuid))
+          .then(() => {
+            this.status.detailsLoading++;
+            return portalDetail.request(portalGuid)
+          })
           .then(portalDetailData => {
             this.status.detailsLoaded++;
             resolve(portalDetailData);
