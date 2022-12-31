@@ -1,8 +1,7 @@
 import type {IITC} from "../../types/iitc";
 import type {WmCondition, WmConfig, WmHistory, WmRule} from "../config/config";
-import {sleep} from "../utils/helpers";
-import {interpolate} from "../utils/stringUtils";
-import * as WU from "../utils/wasabeeUtils";
+import {interpolate, sleep} from "../utils/helpers";
+import {addMarker, getMarker, getPortalMarkers, removeMarker} from "../utils/wasabeeUtils";
 
 export class SearchStatus {
   readonly initialQueue: number;
@@ -204,16 +203,7 @@ export class WmSearch extends EventTarget {
         this.status.detailsCached++;
         resolve(portalDetailData);
       } else {
-        let timeout = 0;
-        if (this.lastRequest == 0) {
-          this.lastRequest = new Date().getTime() - this.config.portalDetailRequestDelay;
-        }
-        const timeDiff = new Date().getTime() - this.lastRequest;
-        if (timeDiff < this.config.portalDetailRequestDelay) {
-          timeout = this.config.portalDetailRequestDelay - timeDiff;
-        }
-        this.lastRequest = new Date().getTime() + timeout;
-        sleep(timeout)
+        sleep(this.calculateRequestTimeout())
           .then(() => {
             this.status.detailsLoading++;
             return portalDetail.request(portalGuid)
@@ -229,6 +219,21 @@ export class WmSearch extends EventTarget {
     });
   }
 
+  private calculateRequestTimeout() {
+    let timeout = 0;
+    if (this.lastRequest === 0) {
+      this.lastRequest = new Date().getTime();
+      return timeout;
+    }
+
+    const timeDiff = new Date().getTime() - this.lastRequest;
+    if (timeDiff < this.config.portalDetailRequestDelay) {
+      timeout = this.config.portalDetailRequestDelay - timeDiff;
+    }
+    this.lastRequest = new Date().getTime() + timeout;
+    return timeout;
+  }
+
   private checkTeam(condition: WmCondition, portalOptions: IITC.PortalOptions) {
     return condition.factions.indexOf(portalOptions.team) >= 0;
   }
@@ -239,25 +244,25 @@ export class WmSearch extends EventTarget {
 
   private checkLevel(condition: WmCondition, portalOptions: IITC.PortalOptions): boolean {
     const value = interpolate(`\${${portalOptions.level} ${condition.levelComparator} ${condition.level}}`);
-    return value.toLowerCase() == 'true';
+    return value.toLowerCase() === 'true';
   }
 
   private addMarker(portalNode: IITC.Portal, markerType: string) {
-    const marker = WU.getMarker(markerType, portalNode.options.guid)
+    const marker = getMarker(markerType, portalNode.options.guid)
     if (!marker) {
-      WU.addMarker(markerType, portalNode.options.guid, portalNode.getLatLng(), portalNode.options.data.title)
+      addMarker(markerType, portalNode.options.guid, portalNode.getLatLng(), portalNode.options.data.title)
       this.status.added++;
     }
   }
 
   private removeMarker(portalNode: IITC.Portal, markerType: string) {
-    const marker = WU.getMarker(markerType, portalNode.options.guid)
+    const marker = getMarker(markerType, portalNode.options.guid)
     this.removeWasabeeMarker(marker);
   }
 
   private removeWasabeeMarker(marker: any) {
     if (marker) {
-      WU.removeMarker(marker);
+      removeMarker(marker);
       this.status.removed++;
     }
   }
@@ -265,16 +270,14 @@ export class WmSearch extends EventTarget {
   private checkPortalDetailsConditions(conditions: WmCondition[], portalDetailData: IITC.PortalDataDetail, portalNodeOptions: IITC.PortalOptions): boolean {
     return !!conditions
       .find(condition =>
-          this.checkSimpleConditions(condition, portalNodeOptions)
-          && (
-            this.checkMods(condition, portalDetailData)
-            || this.checkSlots(condition, portalDetailData)
-          )
+        this.checkSimpleConditions(condition, portalNodeOptions)
+        && this.checkMods(condition, portalDetailData)
+        && this.checkSlots(condition, portalDetailData)
       );
   }
 
   private checkMods(condition: WmCondition, portalDetailData: IITC.PortalDataDetail): boolean {
-    return !!portalDetailData.mods
+    return condition.mods.length === 0 || !!portalDetailData.mods
       .find(portalMod =>
         condition.mods
           .find(conditionMod => portalMod?.rarity == conditionMod.rarity && portalMod.name == conditionMod.type));
@@ -348,7 +351,7 @@ export class WmSearch extends EventTarget {
   }
 
   private removeAllMakers(portalOptions: IITC.PortalOptions) {
-    WU.getPortalMarkers(portalOptions.guid)?.forEach((marker: any) => this.removeWasabeeMarker(marker));
+    getPortalMarkers(portalOptions.guid)?.forEach((marker: any) => this.removeWasabeeMarker(marker));
   }
 
   private checkSimpleConditions(condition: WmCondition, portalOptions: IITC.PortalOptions) {
@@ -358,9 +361,9 @@ export class WmSearch extends EventTarget {
   }
 
   private checkHistory(condition: WmCondition, portalOptions: IITC.PortalOptions) {
-    if (condition.history) {
-      const portalHistory = portalOptions.data.history;
+    if (condition.history && Object.keys(condition.history).length > 0) {
       const historyConditionNames = Object.keys(condition.history);
+      const portalHistory = portalOptions.data.history;
       if (!portalHistory) {
         return !!historyConditionNames.find((name) => !condition.history?.[<keyof WmHistory>name]);
       }
@@ -370,15 +373,15 @@ export class WmSearch extends EventTarget {
   }
 
   private checkSlots(condition: WmCondition, portalDetailData: IITC.PortalDataDetail): boolean {
-    return this.checkModSlots(portalDetailData, condition.slots?.mods) || this.checkResoSlots(portalDetailData, condition.slots?.r8);
+    return this.checkModSlots(portalDetailData, condition.slots?.mods) && this.checkResoSlots(portalDetailData, condition.slots?.r8);
   }
 
   private checkModSlots(portalDetailData: IITC.PortalDataDetail, mods?: number): boolean {
-    return !!mods && !!portalDetailData.mods && this.theModSlotCheck(mods, portalDetailData.mods);
+    return !mods || this.theModSlotCheck(mods, portalDetailData.mods);
   }
 
   private checkResoSlots(portalDetailData: IITC.PortalDataDetail, r8?: number): boolean {
-    return !!r8 && !!portalDetailData.resonators && this.theResoSlotCheck(portalDetailData.resonators, r8);
+    return !r8 || this.theResoSlotCheck(portalDetailData.resonators, r8);
   }
 
   private theModSlotCheck(conditionMods: number, portalMods: [(IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null)]): boolean {

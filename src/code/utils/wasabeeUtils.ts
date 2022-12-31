@@ -18,6 +18,9 @@ export function addMarker(markerType: string, guid: string, latLng: LatLng, titl
       }
     });
   }
+  // else {
+  //   L.circle(latLng, { radius: 15, weight: 5, color: 'red', fill: false}).addTo(map);
+  // }
 }
 
 export function removeMarker(marker: any) {
