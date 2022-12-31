@@ -34,11 +34,11 @@ export class SearchStatus {
   }
 
   get runningRequests(): number {
-    return this.detailsLoading - this.detailsCached - this.detailsLoaded - this.errors;
+    return this.detailsLoading - this.detailsLoaded - this.errors;
   }
 
   get waitingRequests(): number {
-    return this.detailsRequested - this.detailsLoading;
+    return this.detailsRequested - this.detailsLoading - this.detailsCached;
   }
 
   get duration(): number {
