@@ -27,6 +27,7 @@ export class ArrayItemField<T> implements Field {
         model.push(this.item);
       }
       this.selected = !this.selected;
+      itemElement.dispatchEvent(new Event('change', {bubbles: true}))
     });
 
     if (this.itemRenderer) {

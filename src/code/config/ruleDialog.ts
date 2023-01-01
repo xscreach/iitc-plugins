@@ -14,6 +14,21 @@ export class RuleDialog extends Dialog {
   private readonly form: Form;
   private readonly table: Table<WmCondition>;
 
+  private saveButtonDef: JQueryUI.ButtonOptions = {
+    text: '',
+    click: () => {
+      this.save();
+      this.closeDialog();
+    }
+  };
+
+  private buttons = [this.saveButtonDef, {
+    text: 'Close',
+    click: () => {
+      this.closeDialog();
+    }
+  }];
+
   constructor(private readonly config: WmConfig, markerType: string, private readonly originalRule?: WmRule) {
     super();
     if (originalRule) {
@@ -57,21 +72,6 @@ export class RuleDialog extends Dialog {
     return conditionText;
   }
 
-  private saveButtonDef: JQueryUI.ButtonOptions = {
-    text: '',
-    click: () => {
-      this.save();
-      this.closeDialog();
-    }
-  };
-
-  private closeButtonDef: JQueryUI.ButtonOptions = {
-    text: 'Close',
-    click: () => {
-      this.closeDialog();
-    }
-  };
-
   addHooks() {
     const html = L.DomUtil.create("div", "container");
 
@@ -105,14 +105,14 @@ export class RuleDialog extends Dialog {
       html: html,
       width: "350",
       dialogClass: "wm-config-rule",
-      buttons: [this.saveButtonDef, this.closeButtonDef],
+      buttons: this.buttons,
     });
   }
 
   private updateButtons() {
     this.saveButtonDef.disabled = !this.rule.conditions || this.rule.conditions.length === 0;
     if (this.enabled()) {
-      this.setButtons([this.saveButtonDef, this.closeButtonDef]);
+      this.setButtons(this.buttons);
     }
   }
 

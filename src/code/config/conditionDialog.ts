@@ -15,6 +15,27 @@ export class ConditionDialog extends Dialog {
   private readonly condition: WmCondition;
   private form: Form;
 
+  private readonly saveButtonDef: JQueryUI.ButtonOptions = {
+    text: '',
+    click: () => {
+      Object.assign(this.condition, this.form.model);
+      if (this.isNew) {
+        this.rule.conditions.push(this.condition);
+      }
+      this.closeDialog();
+    }
+  }
+
+  private readonly buttons: JQueryUI.ButtonOptions[] = [
+    this.saveButtonDef,
+    {
+      text: "Cancel",
+      click: () => {
+        this.closeDialog();
+      }
+    }
+  ];
+
   constructor(private rule: WmRule, condition: WmCondition | undefined = undefined) {
     super();
     if (!condition) {
@@ -83,34 +104,24 @@ export class ConditionDialog extends Dialog {
 
   private _displayDialog() {
     const html = L.DomUtil.create("div", "container");
-    html.append(this.form.html())
+    const formElement = this.form.html();
+    formElement.addEventListener('change', () => this.updateButtons())
+    html.append(formElement)
 
-    const okButtonName = this.isNew ? "Add" : "Save";
-
-    const buttons = {
-      [okButtonName]: () => {
-        Object.assign(this.condition, this.form.model);
-        if (this.isNew) {
-          this.rule.conditions.push(this.condition);
-        }
-        this.closeDialog();
-      },
-      "Cancel": () => {
-        this.closeDialog();
-      }
-    };
+    this.saveButtonDef.text = this.isNew ? "Add" : "Save";
 
     const title = this.isNew ? 'New' : 'Edit';
     let id = 'wm-config-condition';
     if (!this.isNew) {
       id += '-' + this.rule.conditions.indexOf(this.condition);
     }
+    this.updateButtons();
     this.createDialog({
       title: `${title} Condition`,
       html: html,
       width: "350",
       dialogClass: 'wm-config-condition',
-      buttons: buttons,
+      buttons: this.buttons,
       id: id
     });
   }
@@ -198,5 +209,13 @@ export class ConditionDialog extends Dialog {
         }
       })
     });
+  }
+
+  private updateButtons() {
+    const formModel: WmCondition = this.form.model
+    this.saveButtonDef.disabled = !(formModel.factions.length > 0 || formModel.mods.length > 0 || Object.keys(formModel.slots || {}).length > 0 || Object.keys(formModel.history || {}).length > 0);
+    if (this.enabled()) {
+      this.setButtons(this.buttons);
+    }
   }
 }
