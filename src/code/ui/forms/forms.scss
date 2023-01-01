@@ -14,9 +14,17 @@
       padding: 2px;
       margin: 3px 0;
     }
+  }
 
-    input:disabled {
-      color: #aaa !important;
-    }
+  select {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #FFCE00;
+    border: 1px solid #FFCE00;
+  }
+
+  input:disabled, button:disabled, select:disabled {
+    color: #aaa !important;
+    border-color: #aaa !important;
+    text-decoration: none !important;
   }
 }
