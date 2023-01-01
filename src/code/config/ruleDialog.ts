@@ -41,6 +41,7 @@ export class RuleDialog extends Dialog {
       emptyText: 'No conditions defined.',
       addDeleteColumn: true
     });
+    this.table.addEventListener('update', () => this.updateButtons());
   }
 
   private getConditionString(condition: WmCondition): string {
@@ -55,6 +56,21 @@ export class RuleDialog extends Dialog {
     }
     return conditionText;
   }
+
+  private saveButtonDef: JQueryUI.ButtonOptions = {
+    text: '',
+    click: () => {
+      this.save();
+      this.closeDialog();
+    }
+  };
+
+  private closeButtonDef: JQueryUI.ButtonOptions = {
+    text: 'Close',
+    click: () => {
+      this.closeDialog();
+    }
+  };
 
   addHooks() {
     const html = L.DomUtil.create("div", "container");
@@ -72,30 +88,32 @@ export class RuleDialog extends Dialog {
 
     let title = "New rule";
     let id = 'wm-config-rule';
-    let okButton = 'Add';
+    let okButtonText = 'Add';
 
     if (this.originalRule) {
       title = 'Editing rule ' + this.originalRule.name;
       id += '-' + this.originalRule?.name.replace(/\s+/g, '-');
-      okButton = 'Save'
+      okButtonText = 'Save'
     }
 
+    this.saveButtonDef.text = okButtonText;
+    this.updateButtons();
+
     this.createDialog({
+      id: id,
       title: title,
       html: html,
       width: "350",
       dialogClass: "wm-config-rule",
-      buttons: {
-        [okButton]: () => {
-          this.save();
-          this.closeDialog();
-        },
-        "Close": () => {
-          this.closeDialog();
-        }
-      },
-      id: id
+      buttons: [this.saveButtonDef, this.closeButtonDef],
     });
+  }
+
+  private updateButtons() {
+    this.saveButtonDef.disabled = !this.rule.conditions || this.rule.conditions.length === 0;
+    if (this.enabled()) {
+      this.setButtons([this.saveButtonDef, this.closeButtonDef]);
+    }
   }
 
   private save() {
@@ -124,10 +142,10 @@ export class RuleDialog extends Dialog {
   private conditionDialog(condition ?: WmCondition) {
     new ConditionDialog(this.rule, condition)
       .showDialog()
-      ?.then(() => this.updateWindow());
+      ?.then(() => this.updateTable());
   }
 
-  private updateWindow() {
+  private updateTable() {
     this.table.update();
   }
 }
