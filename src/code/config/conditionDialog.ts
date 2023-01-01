@@ -213,7 +213,7 @@ export class ConditionDialog extends Dialog {
 
   private updateButtons() {
     const formModel: WmCondition = this.form.model
-    this.saveButtonDef.disabled = !(formModel.factions.length > 0 || formModel.mods.length > 0 || Object.keys(formModel.slots || {}).length > 0 || Object.keys(formModel.history || {}).length > 0);
+    this.saveButtonDef.disabled = formModel.factions.length === 0;
     if (this.enabled()) {
       this.setButtons(this.buttons);
     }
