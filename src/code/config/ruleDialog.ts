@@ -14,12 +14,12 @@ export class RuleDialog extends Dialog {
   private readonly form: Form;
   private readonly table: Table<WmCondition>;
 
-  constructor(private readonly config: WmConfig, private readonly originalRule?: WmRule) {
+  constructor(private readonly config: WmConfig, markerType: string, private readonly originalRule?: WmRule) {
     super();
     if (originalRule) {
       this.rule = copy(originalRule);
     } else {
-      this.rule = new WmRule();
+      this.rule = new WmRule(markerType);
     }
 
     this.form = this.createForm();
@@ -107,9 +107,13 @@ export class RuleDialog extends Dialog {
   }
 
   private createForm() {
+
     const options = Array(Object.keys(WasabeeMarker).length / 2)
       .fill(0)
-      .map((_, index) => new SelectFieldOptions(WasabeeMarker[index], getMarkerTypeName(WasabeeMarker[index])));
+      .map((_, index) => WasabeeMarker[index])
+      .filter(markerType => this.rule.markerType === markerType || !this.config.rules.find(r => r.markerType === markerType))
+      .map(markerType => new SelectFieldOptions(markerType, getMarkerTypeName(markerType)))
+
     const formConfig = [
       new InputField({name: "name", label: "Rule name"}),
       new SelectField({name: "markerType", label: "Marker type", options: options}),

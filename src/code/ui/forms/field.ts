@@ -24,9 +24,7 @@ export abstract class FieldBasics implements Field {
 
   protected constructor(protected readonly type: keyof FieldTypeMap,
                         protected readonly fieldConfig: FieldConfig) {
-
     this.fieldConfig = Object.assign({
-      valueExtractor: (model: any) => model[fieldConfig.name],
       onChange: (model: any) => {
         model[this.fieldConfig.name] = this.valueInput?.value;
       },
@@ -41,9 +39,12 @@ export abstract class FieldBasics implements Field {
   html(model: any): HTMLElement[] {
     this.valueInput = this.createFieldHTMLElement();
     this.valueInput.id = this.id();
-    if (this.fieldConfig.valueExtractor) {
-      this.valueInput.value = this.fieldConfig.valueExtractor(model);
+
+    const value = this.extractValue(model);
+    if (typeof value !== 'undefined') {
+      this.valueInput.value = value;
     }
+
     if (typeof this.fieldConfig.disabled !== 'undefined') {
       this.valueInput.disabled = this.fieldConfig.disabled;
     }
@@ -57,6 +58,13 @@ export abstract class FieldBasics implements Field {
       ...new LabelField(this.id(), this.fieldConfig.label).html(),
       this.valueInput
     ];
+  }
+
+  protected extractValue(model: any) {
+    if (this.fieldConfig.valueExtractor) {
+      return this.fieldConfig.valueExtractor(model);
+    }
+    return model[this.fieldConfig.name];
   }
 
   protected abstract createFieldHTMLElement(): HTMLInputElement | HTMLSelectElement;

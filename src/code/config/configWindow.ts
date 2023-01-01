@@ -6,13 +6,15 @@ import {NumberInputField} from "../ui/forms/numberInputField";
 import {Table} from "../ui/table";
 import {Tabs} from "../ui/tabs";
 import {getMarkerTypeName} from "../utils/wasabeeUtils";
-import {WmConfigHolder, WmRule} from "./config";
+import {WasabeeMarker, WmConfigHolder, WmRule} from "./config";
 import "./configWindow.scss";
 import {RuleDialog} from "./ruleDialog";
 
 export class ConfigWindow extends Dialog {
 
   private form: Form;
+  private readonly ruleTable: Table<WmRule>;
+  private addRuleButton?: HTMLButtonElement;
 
   private readonly searchButton: JQueryUI.ButtonOptions = {
     text: 'Search',
@@ -34,11 +36,10 @@ export class ConfigWindow extends Dialog {
         this.closeDialog();
       }
     }];
-  private readonly ruleTable: Table<WmRule>;
 
   constructor(private readonly search: WmSearch) {
     super();
-    this.updateButtons();
+    this.updateDialogButtons();
     this.form = this.createForm();
     this.ruleTable = this.createRuleTable();
   }
@@ -89,18 +90,23 @@ export class ConfigWindow extends Dialog {
 
     const buttonPane = L.DomUtil.create('div', 'ui-dialog-buttonpane', ruleTab);
     const buttonSet = L.DomUtil.create('div', 'ui-dialog-buttonset', buttonPane);
-    const button = L.DomUtil.create('button', 'ui-button', buttonSet);
-    button.innerText = 'Add Rule';
-    button.addEventListener('click', () => {
+    this.addRuleButton = L.DomUtil.create('button', 'ui-button', buttonSet);
+    this.addRuleButton.innerText = 'Add Rule';
+    this.addRuleButton.addEventListener('click', () => {
       this.ruleDialog();
     });
+    this.updateTableButtons();
 
     return ruleTab;
   }
 
   private updateWindow() {
     this.ruleTable.update();
-    this.updateButtons();
+  }
+
+  private updateButtons() {
+    this.updateDialogButtons();
+    this.updateTableButtons();
   }
 
   private createLink(c: HTMLDivElement, innerText: string, title: string, onClick: () => void) {
@@ -122,7 +128,7 @@ export class ConfigWindow extends Dialog {
     return new Form(this.search.config, formConfig);
   }
 
-  private updateButtons() {
+  private updateDialogButtons() {
     this.searchButton.disabled = !this.search.hasRules();
     if (this.enabled()) {
       this.setButtons(this.buttons);
@@ -130,13 +136,30 @@ export class ConfigWindow extends Dialog {
   }
 
   private ruleDialog(rule?: WmRule) {
-    new RuleDialog(this.search.config, rule)
-      .showDialog()
-      ?.then(() => this.updateWindow());
+    let ruleMarkerType = rule?.markerType;
+    if (!ruleMarkerType) {
+      ruleMarkerType = this.getNextUsableMarkerTypes()
+    }
+
+    if (ruleMarkerType) {
+      new RuleDialog(this.search.config, ruleMarkerType, rule)
+        .showDialog()
+        ?.then(() => this.updateWindow());
+    }
+    else {
+      alert('All marker types taken. Unable to create new rule')
+    }
+  }
+
+  private getNextUsableMarkerTypes(): string | undefined {
+    return Array(Object.keys(WasabeeMarker).length / 2).fill(0)
+      .map((_, index) => WasabeeMarker[index])
+      .filter(markerType => !this.search.config.rules.find(r => r.markerType === markerType))
+      .shift();
   }
 
   private createRuleTable() {
-    return new Table({
+    const table = new Table({
       rows: this.search.config.rules,
       columns: [
         {
@@ -159,5 +182,13 @@ export class ConfigWindow extends Dialog {
       emptyText: 'No rules defined',
       addDeleteColumn: true
     });
+    table.addEventListener('update', () => this.updateButtons());
+    return table;
+  }
+
+  private updateTableButtons() {
+    if (this.addRuleButton) {
+      this.addRuleButton.disabled = !this.getNextUsableMarkerTypes();
+    }
   }
 }

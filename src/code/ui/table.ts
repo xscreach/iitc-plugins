@@ -14,11 +14,11 @@ export interface TableDef<T> {
   addDeleteColumn?: boolean
 }
 
-export class Table<T> {
+export class Table<T> extends EventTarget {
   private readonly container: HTMLDivElement;
 
   constructor(private readonly options: TableDef<T>) {
-
+    super();
     this.container = L.DomUtil.create('div', 'wm-table', this.options.parent);
     if (this.options.addDeleteColumn) {
       this.options.columns.push(
@@ -58,6 +58,7 @@ export class Table<T> {
       this.container.style.gridTemplateColumns = this.options.columns.map(c => c.width || 'auto').join(" ");
       this.options.rows.forEach((r, i) => this.renderRow(r, i));
     }
+    this.dispatchEvent(new CustomEvent('update', {detail: this.options.rows}));
   }
 
   private renderRow(value: T, index: number) {

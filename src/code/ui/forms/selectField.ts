@@ -1,7 +1,8 @@
 import {FieldBasics, FieldConfig} from "./field";
 
 export interface SelectFieldConfig extends FieldConfig {
-  options: SelectFieldOptions[]
+  options: SelectFieldOptions[],
+  allowEmpty?: boolean
 }
 
 export class SelectFieldOptions {
@@ -29,5 +30,14 @@ export class SelectField extends FieldBasics {
     optionElement.title = option.value;
     optionElement.innerText = option.text;
     return optionElement;
+  }
+
+
+  protected extractValue(model: any): string {
+    let value = super.extractValue(model);
+    if (typeof value === 'undefined' && this.config.options.length > 0) {
+      value = this.config.options[0].value;
+    }
+    return value;
   }
 }

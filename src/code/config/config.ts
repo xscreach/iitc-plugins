@@ -92,16 +92,19 @@ export enum WasabeeMarker {
 }
 
 export class WmRule {
-  public name = '';
-  public markerType = WasabeeMarker[WasabeeMarker.DestroyPortalAlert];
-  public conditions: WmCondition[] = []
+  constructor(
+    public markerType: string,
+    public name = '',
+    public conditions: WmCondition[] = []
+  ) {
+  }
 }
 
 export class WmConfig {
   public static readonly CONFIG_KEY = 'wasabee_markers-config';
 
   public rules: WmRule[] = []
-  public markerType?: string = WasabeeMarker[WasabeeMarker.DestroyPortalAlert]
+  public markerType?: string;
   public conditions?: WmCondition[]
   public portalDetailRequestDelay = 250;
   public portalDetailThreads = 5;
@@ -135,10 +138,10 @@ export class WmConfigHolder {
 
   private static migrate(config: WmConfig) {
     if (config.conditions && config.conditions.length > 0) {
-      const wmRule = Object.assign(new WmRule(), {
-        conditions: config.conditions,
+      const wmRule = Object.assign(new WmRule(''), {
+        name: 'Migrated Rule',
         markerType: config.markerType,
-        name: 'Migrated Rule'
+        conditions: config.conditions,
       });
 
       config.rules.push(wmRule);
