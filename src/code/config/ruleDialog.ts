@@ -75,7 +75,9 @@ export class RuleDialog extends Dialog {
   addHooks() {
     const html = L.DomUtil.create("div", "container");
 
-    html.append(this.form.html());
+    const formElement = this.form.html();
+    formElement.addEventListener('change', () => this.updateButtons());
+    html.append(formElement);
     this.table.appendTo(html);
 
     const buttonPane = L.DomUtil.create('div', 'ui-dialog-buttonpane', html);
@@ -110,7 +112,7 @@ export class RuleDialog extends Dialog {
   }
 
   private updateButtons() {
-    this.saveButtonDef.disabled = !this.rule.conditions || this.rule.conditions.length === 0;
+    this.saveButtonDef.disabled = !this.rule.conditions || this.rule.conditions.length === 0 || !this.rule.name || this.rule.name.trim().length === 0;
     if (this.enabled()) {
       this.setButtons(this.buttons);
     }
