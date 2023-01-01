@@ -381,7 +381,7 @@ export class WmSearch extends EventTarget {
   }
 
   private checkResoSlots(portalDetailData: IITC.PortalDataDetail, r8?: number): boolean {
-    return !r8 || this.theResoSlotCheck(portalDetailData.resonators, r8);
+    return !r8 || portalDetailData.team != TEAM_CODES[teamStringToId(PLAYER.team)] || this.theResoSlotCheck(portalDetailData.resonators, r8);
   }
 
   private theModSlotCheck(conditionMods: number, portalMods: [(IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null)]): boolean {
