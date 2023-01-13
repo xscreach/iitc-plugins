@@ -11,7 +11,7 @@ export class SearchStatus {
   detailsCached = 0;
   detailsLoading = 0;
   detailsLoaded = 0;
-  errors = 0;
+  errorGuids: string[] = [];
 
   added = 0;
   removed = 0;
@@ -19,6 +19,10 @@ export class SearchStatus {
   constructor(private queue: IITC.Portal[], public running = false) {
     this.initialQueue = queue.length;
     this.startTime = new Date().getTime();
+  }
+
+  get errors(): number {
+    return this.errorGuids.length;
   }
 
   get remaining(): number {
@@ -81,6 +85,10 @@ export class SearchStatus {
     }
     return undefined;
   }
+
+  canRetry(): boolean {
+    return this.errors > 0;
+  }
 }
 
 export class WmSearch extends EventTarget {
@@ -91,15 +99,15 @@ export class WmSearch extends EventTarget {
     super();
 
     addHook("mapDataRefreshEnd", () => {
-      if (getDataZoomForMapZoom(map.getZoom()) >= 15 && this.config.keepScanning) {
+      if (window.getDataZoomTileParameters().hasPortals && this.config.keepScanning) {
         this.start();
       }
     });
   }
 
-  start() {
+  start(retry?: boolean) {
     if (!this.status.running && this.hasRules()) {
-      this.startSearch();
+      this.startSearch(retry);
     }
   }
 
@@ -123,18 +131,22 @@ export class WmSearch extends EventTarget {
     this.markProgress();
   }
 
-  private startSearch(): void {
+  private startSearch(retry?: boolean): void {
+    let retryQueue: IITC.Portal[] | undefined;
+    if (retry) {
+      retryQueue = this.status.errorGuids.map(guid => portals[guid]);
+    }
     this.status = new SearchStatus([], true);
     this.markProgress();
     this.progressMarkingLoop();
 
     sleep(0)
-      .then(() => this.search())
+      .then(() => this.search(retryQueue))
       .finally(() => this.stop());
   }
 
-  private search(): Promise<void[]> {
-    this.status = new SearchStatus(this.prepareQueue(), true);
+  private search(retryQueue?: IITC.Portal[]): Promise<void[]> {
+    this.status = new SearchStatus(retryQueue || this.prepareQueue(), true);
 
     this.lastRequest = 0;
     return Promise.all(Array(Number(this.config.portalDetailThreads))
@@ -342,7 +354,7 @@ export class WmSearch extends EventTarget {
           }
         } catch (e) {
           console.log("Error");
-          this.status.errors++;
+          this.status.errorGuids.push(portalOptions.guid);
         }
       }
     } else {

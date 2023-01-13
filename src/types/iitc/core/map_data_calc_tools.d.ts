@@ -38,6 +38,8 @@ declare global {
 
   function getMapZoomTileParameters(zoom: number): MapZoomTileParameters;
 
+  function getDataZoomTileParameters(zoom?: number): MapZoomTileParameters;
+
   /**
    * we can fetch data at a zoom level different to the map zoom.
    * To improve the cacheing performance, we try and limit the number of zoom levels we retrieve data for

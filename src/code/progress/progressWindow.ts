@@ -28,21 +28,28 @@ export class ProgressWindow extends Dialog {
   private fieldMap: { [key: string]: HTMLDivElement } = {};
   private lastStatus = false;
 
-  private startButton = {
-    text: "Start",
+  private startButton: JQueryUI.ButtonOptions = {
+    text: "Restart",
     click: () => {
       this.search.start();
     }
   };
 
-  private stopButton = {
+  private restartButton: JQueryUI.ButtonOptions = {
+    text: "Retry errors",
+    click: () => {
+      this.search.start(true);
+    }
+  };
+
+  private stopButton: JQueryUI.ButtonOptions = {
     text: "Stop",
     click: () => {
       this.search.stop();
     }
   };
 
-  private closeButton = {
+  private closeButton: JQueryUI.ButtonOptions = {
     text: "Close",
     click: () => {
       this.closeDialog();
@@ -94,12 +101,19 @@ export class ProgressWindow extends Dialog {
       html: html,
       width: "350",
       dialogClass: 'wm-config-progress',
-      buttons: [
-        this.lastStatus ? this.stopButton : this.startButton,
-        this.closeButton
-      ],
+      buttons: this.getDialogButtonConfigs(),
       id: 'wm-config-progress'
     });
+  }
+
+  private getDialogButtonConfigs() {
+    let buttons = [this.stopButton];
+    if (!this.lastStatus) {
+      this.restartButton.disabled = !this.search.status.canRetry();
+      buttons = [this.startButton, this.restartButton];
+    }
+    buttons.push(this.closeButton);
+    return buttons;
   }
 
   private createDivs(fields: string[], suffix = '') {
@@ -118,7 +132,7 @@ export class ProgressWindow extends Dialog {
     if (status.running != this.lastStatus) {
       this.lastStatus = status.running;
       if (this.enabled()) {
-        this.setButtons([status.running ? this.stopButton : this.startButton, this.closeButton]);
+        this.setButtons(this.getDialogButtonConfigs());
       }
     }
   }

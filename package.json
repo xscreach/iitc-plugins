@@ -35,6 +35,7 @@
     "sass": "^1.56.1",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.3.6",
     "through2": "^4.0.2",
     "to-string-loader": "^1.2.0",
     "ts-loader": "^9.2.8",
@@ -46,7 +47,7 @@
   },
   "scripts": {
     "build": "webpack --progress --env build=local",
-    "watch": "webpack --progress --env build=local --watch",
+    "watch": "webpack --progress --env build=local --watch --stats-error-details",
     "prod": "webpack --progress --env build=prod",
     "format:check": "prettier --check src/code",
     "format:run": "prettier --write src/code",
