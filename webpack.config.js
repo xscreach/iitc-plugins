@@ -6,7 +6,6 @@ const { ConcatSource } = require("webpack-sources");
 const Compilation = require("webpack/lib/Compilation");
 const ESLintWebpackPlugin = require("eslint-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
 
 // eslint-disable-next-line no-extend-native
 String.prototype.interpolate = function (params) {
@@ -138,7 +137,7 @@ module.exports = (env, argv) => {
   const dev = build !== "prod";
   const commonConfig = {
     mode: dev ? "development" : "production",
-    devtool: dev ? "eval" : "nosources-source-map",
+    devtool: dev ? "eval-source-map" : undefined,
     resolve: {
       modules: ["node_modules"],
       extensions: [".ts", ".js"],
@@ -185,14 +184,7 @@ module.exports = (env, argv) => {
         },
       ],
     },
-    plugins: [
-      new ESLintPlugin({ fix: true }),
-      new TerserPlugin({
-        terserOptions: {
-          compress: !dev,
-        },
-      }),
-    ].concat(dev ? [] : [new MiniCssExtractPlugin()]),
+    plugins: [new ESLintPlugin({ fix: true })].concat(dev ? [] : [new MiniCssExtractPlugin()]),
   };
 
   if (dev) {
