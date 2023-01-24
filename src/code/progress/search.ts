@@ -125,8 +125,9 @@ export class WmSearch extends EventTarget {
   }
 
   private done() {
-    if (this.config.autoUpload && (this.status.added > 0 || this.status.removed > 0)) {
-      plugin.wasabee?.buttons.options.buttons.get("uploadButton").button.click();
+    const uploadButton = plugin.wasabee?.buttons.options.buttons.get("uploadButton").button;
+    if (uploadButton && uploadButton.checkVisibility() && this.config.autoUpload && (this.status.added > 0 || this.status.removed > 0)) {
+      uploadButton.click();
     }
     this.markProgress();
   }
