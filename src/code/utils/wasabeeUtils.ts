@@ -6,7 +6,7 @@ export function addMarker(markerType: string, guid: string, latLng: LatLng, titl
       id: guid,
       lat: latLng.lat,
       lng: latLng.lng,
-      name: title,
+      name: title || guid,
       comment: '',
       hardness: '',
     };
