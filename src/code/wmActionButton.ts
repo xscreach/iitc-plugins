@@ -1,6 +1,6 @@
 import type {ControlOptions} from "leaflet";
 import {ConfigWindow} from "./config/configWindow";
-import * as WM from "./globals";
+import * as WM from "./wm-globals";
 import type {SearchStatus, WmSearch} from "./progress/search";
 import "./wmActionButton.scss"
 

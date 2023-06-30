@@ -184,7 +184,6 @@ module.exports = (env, argv) => {
         },
       ],
     },
-    plugins: [new ESLintPlugin({ fix: true })].concat(dev ? [] : [new MiniCssExtractPlugin()]),
   };
 
   if (dev) {
@@ -209,7 +208,7 @@ module.exports = (env, argv) => {
     const meta = Object.assign({}, commonMeta, pluginCfg.headers);
     if (commit) meta.version += `-${commit}`;
 
-    config.plugins.push(new IITCScript({ config: pluginCfg, meta: meta, withMeta: true }));
+    config.plugins = [new ESLintPlugin({ fix: true }), new IITCScript({ config: pluginCfg, meta: meta, withMeta: true })].concat(dev ? [] : [new MiniCssExtractPlugin()]);
 
     configs.push(config);
   });

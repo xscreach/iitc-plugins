@@ -28,6 +28,16 @@
       },
       "pluginCode": "wasabeeMarkers",
       "pluginName": "Wasabee Auto Markers"
+    },
+    {
+      "headers": {
+        "id": "HideChatUI",
+        "description": "Removes chat UI",
+        "version": "0.0.1.BUILDDATE",
+        "category": "Misc"
+      },
+      "pluginCode": "hideChatUI",
+      "pluginName": "Hide Chat UI"
     }
   ],
   "releaseFolder": {

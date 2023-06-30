@@ -1,6 +1,6 @@
 import {WmConfigHolder} from "./config/config";
 import {ConfigWindow} from "./config/configWindow";
-import * as WM from "./globals";
+import * as WM from "./wm-globals";
 import {ProgressWindow} from "./progress/progressWindow";
 import {WmSearch} from "./progress/search";
 import "./wasabeeMarkers-mobile.scss"
