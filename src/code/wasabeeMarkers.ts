@@ -6,6 +6,16 @@ import {WmSearch} from "./progress/search";
 import "./wasabeeMarkers-mobile.scss"
 import {ActionButton} from "./wmActionButton";
 
+plugin[WM.PLUGIN_CODE].info.changelog = [
+  {
+    version: '0.0.8',
+    changes: [
+      'Remove only markers with configured types - Do not remove user-added markers with different type',
+      'Option to \'keep "completed" markers on map\''
+    ]
+  }
+]
+
 plugin[WM.PLUGIN_CODE].init = function () {
 
   if (isSmartphone()) {

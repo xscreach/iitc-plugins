@@ -22,12 +22,13 @@ function wrapper(plugin_info) {
   }
 
   window.plugin.\${pluginCode} = window.plugin.\${pluginCode} = {};
-  window.plugin.\${pluginCode}.info = plugin_info.script;
-
-  // Code injection
-  function setup () {
+  window.plugin.\${pluginCode}.info = plugin_info;
+  window.plugin.\${pluginCode}.info.pluginId = '\${pluginCode}';
+// Code injection
 `;
+
 const wrapSuffix = `
+  function setup () {
     window.plugin.\${pluginCode}.init();
   }
 

@@ -112,6 +112,7 @@ export class WmConfig {
   public showResults = true;
   public keepScanning = false;
   public autoUpload = true;
+  public keepCompletedMarkers = false;
 
   public save(): void {
     localStorage.setItem(WmConfig.CONFIG_KEY, JSON.stringify(this));

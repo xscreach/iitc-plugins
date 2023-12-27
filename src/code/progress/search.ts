@@ -1,7 +1,7 @@
 import type {IITC} from "../../types/iitc";
 import type {WmCondition, WmConfig, WmHistory, WmRule} from "../config/config";
 import {interpolate, sleep} from "../utils/helpers";
-import {addMarker, getMarker, getPortalMarkers, removeMarker} from "../utils/wasabeeUtils";
+import {addMarker, getMarker, removeMarker} from "../utils/wasabeeUtils";
 
 export class SearchStatus {
   readonly initialQueue: number;
@@ -199,10 +199,7 @@ export class WmSearch extends EventTarget {
   }
 
   private async checkNode(portalNode?: IITC.Portal): Promise<void> {
-    if (this.status.running && portalNode) {
-      if (!this.checkLocation(portalNode)) {
-        return
-      }
+    if (this.status.running && portalNode && this.checkLocation(portalNode)) {
       await this.checkPortalDetails(this.config.rules, portalNode);
     }
   }
@@ -274,7 +271,7 @@ export class WmSearch extends EventTarget {
   }
 
   private removeWasabeeMarker(marker: any) {
-    if (marker) {
+    if (marker && (!this.config.keepCompletedMarkers || marker.state !== 'completed')) {
       removeMarker(marker);
       this.status.removed++;
     }
@@ -359,12 +356,8 @@ export class WmSearch extends EventTarget {
         }
       }
     } else {
-      this.removeAllMakers(portalOptions);
+      originalRules.forEach(r => this.removeMarker(portalNode, r.markerType));
     }
-  }
-
-  private removeAllMakers(portalOptions: IITC.PortalOptions) {
-    getPortalMarkers(portalOptions.guid)?.forEach((marker: any) => this.removeWasabeeMarker(marker));
   }
 
   private checkSimpleConditions(condition: WmCondition, portalOptions: IITC.PortalOptions) {

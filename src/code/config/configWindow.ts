@@ -118,7 +118,8 @@ export class ConfigWindow extends Dialog {
 
   private createForm() {
     const formConfig = [
-      new BooleanCheckBoxField({name: 'keepScanning', label: 'Scan when map with portals loaded'}),
+      new BooleanCheckBoxField({name: 'keepScanning', label: 'Scan when map with portals is loaded'}),
+      new BooleanCheckBoxField({name: 'keepCompletedMarkers', label: 'Keep "completed" markers on map'}),
       new BooleanCheckBoxField({name: 'autoUpload', label: 'Upload operation when done'}),
       new BooleanCheckBoxField({name: 'showProgress', label: 'Show progress'}),
       new BooleanCheckBoxField({name: 'showResults', label: 'Show results'}),
