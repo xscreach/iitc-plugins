@@ -8,4 +8,5 @@ src/**.js
 coverage
 *.log
 yarn.lock
-releaes/local/
+releases/local/
+package-lock.json
