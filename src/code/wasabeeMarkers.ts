@@ -8,6 +8,12 @@ import {ActionButton} from "./wmActionButton";
 
 plugin[WM.PLUGIN_CODE].info.changelog = [
   {
+    version: '0.0.9',
+    changes: [
+      'Fixes ITO search'
+    ]
+  },
+  {
     version: '0.0.8',
     changes: [
       'Remove only markers with configured types - Do not remove user-added markers with different type',
