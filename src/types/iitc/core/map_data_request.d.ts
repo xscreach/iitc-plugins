@@ -146,7 +146,7 @@ export class MapDataRequest {
   refresh(): void;
 
   delayProcessRequestQueue(delayInSeconds: number): void;
-  processRequestQueue(boolean): void;
+  processRequestQueue(force: boolean): void;
   sendTileRequest(tiles: string[]): void;
   requeueTile(id: string, error: boolean): void;
   private handleResponse(data: any, tiles: string[], success: boolean): void;

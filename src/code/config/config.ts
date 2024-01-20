@@ -29,8 +29,8 @@ export const WmModTypes: { [key: string]: string[] } = {
   'SoftBank Ultra Link': [WmModRarity.VERY_RARE],
   'Turret': [WmModRarity.RARE],
   'Force Amp': [WmModRarity.RARE],
-  'ITO-': [WmModRarity.RARE],
-  'ITO+': [WmModRarity.RARE],
+  'Ito En Transmuter (+)': [WmModRarity.VERY_RARE],
+  'Ito En Transmuter (-)': [WmModRarity.VERY_RARE],
 }
 
 export const WmHistoryFields: { [key: string]: string } = {
@@ -38,8 +38,6 @@ export const WmHistoryFields: { [key: string]: string } = {
   captured: 'Captured',
   scoutControlled: 'Scout Controlled'
 }
-
-
 
 export type WmModConditions ={
   type: keyof typeof WmModTypes
@@ -148,6 +146,26 @@ export class WmConfigHolder {
       config.rules.push(wmRule);
       delete config.markerType;
       delete config.conditions;
+      config.save();
+    }
+
+    if (config.rules.some(r => r.conditions?.some(c => c.mods.some(m => m.type == 'ITO-' || m.type == 'ITO+')))) {
+      config.rules = config.rules.map(r => {
+        r.conditions = r.conditions.map(c => {
+          c.mods = c.mods.map(m => {
+            if (m.type == 'ITO-') {
+              m.type = 'Ito En Transmuter (-)';
+              m.rarity = WmModRarity.VERY_RARE;
+            } else if (m.type == 'ITO+') {
+              m.type = 'Ito En Transmuter (+)'
+              m.rarity = WmModRarity.VERY_RARE;
+            }
+            return m;
+          });
+          return c;
+        });
+        return r;
+      });
       config.save();
     }
   }
