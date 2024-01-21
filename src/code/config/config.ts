@@ -93,8 +93,8 @@ export class WmRule {
   constructor(
     public markerType: string,
     public name = '',
-    public conditions: WmCondition[] = []
-  ) {
+    public conditions: WmCondition[] = [],
+    public disabled: boolean = false) {
   }
 }
 
@@ -118,7 +118,7 @@ export class WmConfig {
   }
 
   public copy(): WmConfig {
-    return Object.assign(new WmConfig(), copy(this));
+    return Object.assign(new WmConfig(), copy<WmConfig>(this));
   }
 }
 

@@ -112,7 +112,7 @@ export class WmSearch extends EventTarget {
   }
 
   hasRules(): boolean {
-    return this.config.rules && this.config.rules.length > 0 && !!this.config.rules.find(value => value.conditions && value.conditions.length > 0);
+    return this.config.rules && this.config.rules.length > 0 && !!this.config.rules.find(rule => !rule.disabled && rule.conditions && rule.conditions.length > 0);
   }
 
   stop() {
@@ -200,7 +200,7 @@ export class WmSearch extends EventTarget {
 
   private async checkNode(portalNode?: IITC.Portal): Promise<void> {
     if (this.status.running && portalNode && this.checkLocation(portalNode)) {
-      await this.checkPortalDetails(this.config.rules, portalNode);
+      await this.checkPortalDetails(this.config.rules.filter(rule => !rule.disabled), portalNode);
     }
   }
 
@@ -322,7 +322,7 @@ export class WmSearch extends EventTarget {
     originalRules.forEach(rule => {
       const conditions = rule.conditions.filter(condition => this.checkSimpleConditions(condition, portalOptions));
       if (conditions.length > 0) {
-        rules.push({name: rule.name, markerType: rule.markerType, conditions: conditions})
+        rules.push({name: rule.name, markerType: rule.markerType, conditions: conditions, disabled: false})
       } else {
         this.removeMarker(portalNode, rule.markerType);
       }

@@ -23,7 +23,7 @@
       "headers": {
         "id": "WasabeeAutoMarkers",
         "description": "Marks specific portals with Wasabee markers based on configuration",
-        "version": "0.0.9.BUILDDATE",
+        "version": "0.1.0.BUILDDATE",
         "category": "Wasabee"
       },
       "pluginCode": "wasabeeMarkers",

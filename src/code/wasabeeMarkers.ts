@@ -10,6 +10,11 @@ plugin[WM.PLUGIN_CODE].info.changelog = [
   {
     version: '0.0.9',
     changes: [
+      'Ability to enable/disable rules'
+    ]
+  },{
+    version: '0.0.9',
+    changes: [
       'Fixes ITO search'
     ]
   },

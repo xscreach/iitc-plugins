@@ -80,6 +80,7 @@ export class ConfigWindow extends Dialog {
   }
 
   closeDialog() {
+
     this.search.config = WmConfigHolder.config.copy();
     super.closeDialog();
   }
@@ -163,6 +164,19 @@ export class ConfigWindow extends Dialog {
     const table = new Table({
       rows: this.search.config.rules,
       columns: [
+        {
+          name: 'enabled',
+          valueRenderer: (c, rule) => {
+            var checkbox = L.DomUtil.create('input', undefined, c);
+            checkbox.type = 'checkbox';
+            checkbox.checked = !rule.disabled;
+            checkbox.onchange = (ev => {
+              rule.disabled = !(ev.target as HTMLInputElement).checked;
+              this.updateDialogButtons();
+              return false;
+            });
+          }
+        },
         {
           name: 'name',
           valueRenderer: (c, rule) => {
