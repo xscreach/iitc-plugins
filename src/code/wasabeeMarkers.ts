@@ -4,7 +4,7 @@ import * as WM from "./wm-globals";
 import {ProgressWindow} from "./progress/progressWindow";
 import {WmSearch} from "./progress/search";
 import "./wasabeeMarkers-mobile.scss"
-import {ActionButton} from "./wmActionButton";
+import {WasabeeActionButton} from "./wmActionButton";
 
 plugin[WM.PLUGIN_CODE].info.changelog = [
   {
@@ -43,7 +43,7 @@ plugin[WM.PLUGIN_CODE].init = function () {
     .on("click", () => new ConfigWindow(search).showDialog())
     .appendTo('#toolbox');
 
-  map.addControl(new ActionButton(search));
+  map.addControl(new WasabeeActionButton(search));
 
   createProgressWindow(search);
 }
