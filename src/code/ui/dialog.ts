@@ -8,7 +8,7 @@ export class Dialog extends L.Handler {
   private dialogPromise?: Promise<void>;
 
   constructor() {
-    super(window.map);
+    super(map);
   }
 
   showDialog(): Promise<void> | undefined {

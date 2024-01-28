@@ -1,0 +1,20 @@
+import WasabeeOp from "./model/operation";
+import type { LeafletEvent } from "leaflet";
+export declare function getSelectedOperation(): WasabeeOp;
+export declare function initSelectedOperation(): Promise<WasabeeOp>;
+export declare function changeOpIfNeeded(): Promise<WasabeeOp>;
+export declare function loadNewDefaultOp(): Promise<WasabeeOp>;
+export declare function makeSelectedOperation(opID: OpID): Promise<void>;
+export declare function setupLocalStorage(): Promise<void>;
+export declare function removeOperation(opID: OpID): Promise<void>;
+export declare function showOperation(opID: OpID): void;
+export declare function hideOperation(opID: OpID): void;
+export declare function resetHiddenOps(): void;
+export declare function resetOps(): Promise<void>;
+export declare function hiddenOpsList(): OpID[];
+export declare function setOpBackground(opID: OpID, background: boolean): Promise<void>;
+export declare function opsList(hidden?: boolean): Promise<string[]>;
+export declare function duplicateOperation(opID: OpID): Promise<WasabeeOp>;
+export declare function removeNonOwnedOps(data: LeafletEvent & {
+    GID: GoogleID;
+}): Promise<void>;
