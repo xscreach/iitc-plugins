@@ -8,7 +8,7 @@ import {WasabeeActionButton} from "./wmActionButton";
 
 plugin[WM.PLUGIN_CODE].info.changelog = [
   {
-    version: '0.0.9',
+    version: '0.1.0',
     changes: [
       'Ability to enable/disable rules'
     ]
