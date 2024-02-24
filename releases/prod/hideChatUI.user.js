@@ -2,7 +2,7 @@
 // @id            HideChatUI
 // @name          Hide Chat UI
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion
-// @version       0.0.1.20231227235343-7eab5e8
+// @version       0.0.1.20240224202148-0acbc3f
 // @updateURL     https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/prod/hideChatUI.meta.js
 // @downloadURL   https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/prod/hideChatUI.user.js
 // @description   Removes chat UI
@@ -22,9 +22,10 @@ function wrapper(plugin_info) {
   window.plugin.hideChatUI = window.plugin.hideChatUI = {};
   window.plugin.hideChatUI.info = plugin_info;
   window.plugin.hideChatUI.info.pluginId = 'hideChatUI';
+
+  function setup () {
 // Code injection
 (()=>{"use strict";plugin.hideChatUI.init=function(){isSmartphone()||($("[id^=chat]").remove(),$(".leaflet-bottom.leaflet-left .leaflet-control:last").width("auto"),$(".leaflet-bottom.leaflet-left .leaflet-control:last").height("auto"))}})();
-  function setup () {
     window.plugin.hideChatUI.init();
   }
 
