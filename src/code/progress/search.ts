@@ -379,15 +379,15 @@ export class WmSearch extends EventTarget {
   }
 
   private checkSlots(condition: WmCondition, portalDetailData: IITC.PortalDataDetail): boolean {
-    return this.checkModSlots(portalDetailData, condition.slots?.mods) && this.checkResoSlots(portalDetailData, condition.slots?.r8);
+    return this.checkModSlots(portalDetailData, condition.slots?.mods) || this.checkResoSlots(portalDetailData, condition.slots?.r8);
   }
 
   private checkModSlots(portalDetailData: IITC.PortalDataDetail, mods?: number): boolean {
-    return !mods || this.theModSlotCheck(mods, portalDetailData.mods);
+    return !!mods && this.theModSlotCheck(mods, portalDetailData.mods);
   }
 
   private checkResoSlots(portalDetailData: IITC.PortalDataDetail, r8?: number): boolean {
-    return !r8 || portalDetailData.team != TEAM_CODES[teamStringToId(PLAYER.team)] || this.theResoSlotCheck(portalDetailData.resonators, r8);
+    return !!r8 && portalDetailData.team == TEAM_CODES[teamStringToId(PLAYER.team)] && portalDetailData.level < 8 && this.theResoSlotCheck(portalDetailData.resonators, r8);
   }
 
   private theModSlotCheck(conditionMods: number, portalMods: [(IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null), (IITC.Mod | null)]): boolean {

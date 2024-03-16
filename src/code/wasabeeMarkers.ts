@@ -8,6 +8,12 @@ import {WasabeeActionButton} from "./wmActionButton";
 
 plugin[WM.PLUGIN_CODE].info.changelog = [
   {
+    version: '0.1.1',
+    changes: [
+      'Fixed mod/reso slot/upgrade search'
+    ]
+  },
+  {
     version: '0.1.0',
     changes: [
       'Ability to enable/disable rules'

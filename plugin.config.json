@@ -10,8 +10,8 @@
       "namespace": "https://github.com/IITC-CE/ingress-intel-total-conversion"
     },
     "local": {
-      "downloadURL": "http://localhost:8000/${pluginCode}.user.js",
-      "updateURL": "http://localhost:8000/${pluginCode}.meta.js"
+      "downloadURL": "http://localhost:8000/local/${pluginCode}.user.js",
+      "updateURL": "http://localhost:8000/local/${pluginCode}.meta.js"
     },
     "prod": {
       "updateURL": "https://raw.githubusercontent.com/xscreach/iitc-plugins/master/releases/prod/${pluginCode}.meta.js",
@@ -23,7 +23,7 @@
       "headers": {
         "id": "WasabeeAutoMarkers",
         "description": "Marks specific portals with Wasabee markers based on configuration",
-        "version": "0.1.0.BUILDDATE",
+        "version": "0.1.1.BUILDDATE",
         "category": "Wasabee"
       },
       "pluginCode": "wasabeeMarkers",
